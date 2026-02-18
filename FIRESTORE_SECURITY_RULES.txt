@@ -1,0 +1,166 @@
+/**
+ * 🔐 FIREBASE FIRESTORE SECURITY RULES
+ * 
+ * Copiar y pegar estas reglas en: 
+ * Firebase Console > Firestore Database > Rules
+ * 
+ * IMPORTANTE: No olvidar cambiar version a "version 2"
+ */
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========== FUNCIONES AUXILIARES ==========
+    
+    // Obtener rol del usuario actual
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    // Verificar si el usuario es admin
+    function isAdmin() {
+      return getUserRole() == 'admin';
+    }
+    
+    // Verificar si el usuario es cliente
+    function isClient() {
+      return getUserRole() == 'cliente';
+    }
+    
+    // Verificar si el usuario es propietario del documento
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+    
+    // Verificar autenticación
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // ========== COLECCIÓN: USERS ==========
+    match /users/{userId} {
+      // Cada usuario puede leer su propio documento
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Solo admins pueden crear/actualizar users
+      allow create: if isAdmin();
+      allow update: if isAdmin() || isOwner(userId);
+      
+      // Solo admins pueden eliminar
+      allow delete: if isAdmin();
+    }
+    
+    // ========== COLECCIÓN: PRODUCTS ==========
+    match /products/{productId} {
+      // Lectura pública de productos activos (landing y visitantes)
+      // Admins leen todo
+      allow read: if resource.data.isActive == true || (isAuthenticated() && isAdmin());
+      
+      // Solo admins pueden crear productos
+      allow create: if isAdmin();
+      
+      // Solo admins pueden actualizar
+      allow update: if isAdmin();
+      
+      // Solo admins pueden eliminar
+      allow delete: if isAdmin();
+    }
+    
+    // ========== COLECCIÓN: ORDERS ==========
+    match /orders/{orderId} {
+      // Clientes pueden leer solo sus propias órdenes
+      // Admins pueden leer todas
+      allow read: if isAuthenticated() && (
+        (isClient() && isOwner(resource.data.userId)) ||
+        isAdmin()
+      );
+      
+      // Clientes pueden crear órdenes
+      allow create: if isAuthenticated() && isClient() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Solo admins pueden actualizar estado
+      allow update: if isAdmin();
+      
+      // Solo admins pueden eliminar
+      allow delete: if isAdmin();
+    }
+    
+    // ========== COLECCIÓN: CARTS ==========
+    match /carts/{userId} {
+      // Cada usuario solo puede leer/escribir su carrito
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+    
+    // ========== COLECCIÓN: BLOGS ==========
+    match /blogs/{blogId} {
+      // Lectura pública de blogs publicados
+      // Admins ven todos
+      allow read: if resource.data.isPublished == true || (isAuthenticated() && isAdmin());
+      
+      // Solo admins pueden crear
+      allow create: if isAdmin();
+      
+      // Solo admins pueden actualizar
+      allow update: if isAdmin();
+      
+      // Solo admins pueden eliminar
+      allow delete: if isAdmin();
+    }
+    
+    // ========== COLECCIÓN: LANDING PAGE ==========
+    match /landingPage/{document=**} {
+      // Todos pueden leer la landing
+      allow read: if true;
+      
+      // Solo admins pueden escribir
+      allow write: if isAdmin();
+    }
+    
+    // ========== COLECCIÓN: USER PREFERENCES ==========
+    match /user_preferences/{userId} {
+      // Cada usuario solo accede a sus preferencias
+      allow read, write: if isOwner(userId);
+    }
+    
+    // ========== ALMACENAMIENTO (STORAGE) ==========
+    // Estas son las reglas para Firebase Storage (copiar en Storage Rules):
+    //
+    // rules_version = '2';
+    // service firebase.storage {
+    //   match /b/{bucket}/o {
+    //     function isAdmin() {
+    //       return request.auth != null &&
+    //         get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    //     }
+    //
+    //     // Imágenes de productos (públicas); escritura solo admin
+    //     match /product_images/{allPaths=**} {
+    //       allow read: if true;
+    //       allow write: if isAdmin();
+    //     }
+    //
+    //     // Portadas de blogs (públicas); escritura solo admin
+    //     match /blog_covers/{allPaths=**} {
+    //       allow read: if true;
+    //       allow write: if isAdmin();
+    //     }
+    //
+    //     // Comprobantes de pago: el cliente puede subir/leer los suyos; admin puede leer todo
+    //     match /payment_proofs/{userId}/{allPaths=**} {
+    //       allow write: if request.auth != null && request.auth.uid == userId;
+    //       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    //     }
+    //
+    //     // Imágenes de landing (públicas); escritura solo admin
+    //     match /landing_page/{allPaths=**} {
+    //       allow read: if true;
+    //       allow write: if isAdmin();
+    //     }
+    //   }
+    // }
+  }
+}

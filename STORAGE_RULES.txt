@@ -1,0 +1,61 @@
+/**
+ * 🏪 FIREBASE STORAGE RULES
+ * 
+ * Copiar y pegar estas reglas en:
+ * Firebase Console > Storage > Rules
+ * 
+ * IMPORTANTE: version debe ser 2
+ */
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ========== FUNCIONES AUXILIARES ==========
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+    
+    // ========== PRODUCTOS ==========
+    // Cualquiera puede ver imágenes de productos
+    // Solo admin puede subir/editar
+    match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // ========== PORTADAS DE BLOGS ==========
+    match /blog_covers/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // ========== COMPROBANTES DE PAGO ==========
+    // El usuario puede subir su propio comprobante
+    // El admin puede verlo
+    match /payment_proofs/{orderId}/{allPaths=**} {
+      allow write: if isAuthenticated();
+      allow read: if isAuthenticated() && isAdmin();
+    }
+    
+    // ========== LANDING PAGE ==========
+    match /landing_page/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // ========== POR DEFECTO - DENEGAR ACCESO ==========
+    match /{allPaths=**} {
+      allow read, write: if isAuthenticated() && isAdmin();
+    }
+  }
+}

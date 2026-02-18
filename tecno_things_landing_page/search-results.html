@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Resultados de Búsqueda | Tecno Things</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#ffffff",
+            "background-light": "#f8fafc",
+            "background-dark": "#000000",
+            accent: "#3b82f6"
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "12px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-card.light {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-24 lg:pb-0">
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-30 px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 overflow-visible">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <button id="menu-toggle" onclick="window.toggleMobileMenu ? window.toggleMobileMenu() : document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10" type="button">
+        <span class="material-icons-round">menu</span>
+      </button>
+
+      <a href="./index.html" class="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Tienda Autorizada</span>
+        <h1 class="text-xl font-extrabold tracking-tighter leading-none dark:text-white">TECNO THINGS</h1>
+      </a>
+
+      <!-- Search Icon -->
+      <button id="search-button" class="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors ml-2" title="Buscar productos">
+        <span class="material-icons-round text-lg">search</span>
+      </button>
+    </div>
+
+    <div class="hidden lg:flex items-center gap-6">
+      <a href="./index.html" class="text-sm font-medium hover:text-accent transition-colors">Inicio</a>
+      <a href="./blogs.html" class="text-sm font-medium hover:text-accent transition-colors">Blogs</a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <a href="./cart.html" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 relative">
+        <span class="material-icons-round text-2xl">shopping_bag</span>
+        <span data-cart-count class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full hidden">0</span>
+      </a>
+      <div id="auth-container"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- Floating Search Button (Mobile) -->
+<button id="floating-search" class="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-accent text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all active:scale-95">
+  <span class="material-icons-round text-2xl">search</span>
+</button>
+
+<!-- Search Modal -->
+<div id="search-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-start justify-center pt-20">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full mx-4 max-w-2xl">
+    <div class="flex items-center gap-3 p-6 border-b border-slate-200 dark:border-white/10">
+      <span class="material-icons-round text-xl text-slate-500">search</span>
+      <input 
+        id="search-input" 
+        type="text" 
+        placeholder="Buscar productos..." 
+        class="flex-1 outline-none bg-transparent text-lg"
+        autocomplete="off"
+      />
+      <button id="close-search" class="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg">
+        <span class="material-icons-round">close</span>
+      </button>
+    </div>
+    <div id="search-suggestions" class="max-h-96 overflow-y-auto">
+      <!-- Se llena dinámicamente -->
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="hidden lg:hidden fixed top-16 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 z-40 max-h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+  <div class="px-4 py-2 space-y-1 flex-shrink-0">
+    <a href="./index.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Inicio</a>
+    <a href="./blogs.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Blogs</a>
+    <a href="./cart.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Carrito</a>
+  </div>
+  
+  <!-- Categorías en móvil con scroll interno -->
+  <div class="flex-1 min-h-0 overflow-y-auto">
+    <div id="mobile-categories-container" class="px-4 py-3 space-y-1">
+      <!-- Se inyecta dinámicamente -->
+    </div>
+  </div>
+  
+  <!-- Auth buttons al final, sin scroll -->
+  <div class="px-4 py-3 space-y-2 border-t border-slate-200 dark:border-white/10 flex-shrink-0">
+    <a href="../login_and_registration/login.html" class="block px-4 py-3 rounded-lg hover:bg-accent/10 transition-colors text-sm font-medium text-accent">Iniciar Sesión</a>
+    <a href="../login_and_registration/login.html" class="block px-4 py-3 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors text-sm font-medium">Registrarse</a>
+  </div>
+</div>
+
+<!-- CATEGORIES BAR (desktop) -->
+<div class="hidden lg:block sticky top-16 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-3 overflow-visible">
+  <div id="categories-bar" class="flex items-center justify-center gap-6 max-w-full overflow-visible no-scrollbar">
+    <!-- Categorías dinámicas se inyectan aquí -->
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="px-4 lg:px-6 py-8">
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 mb-6">
+    <a href="./index.html" class="text-sm text-slate-500 dark:text-slate-400 hover:text-accent">Inicio</a>
+    <span class="text-slate-500 dark:text-slate-400">/</span>
+    <span class="text-sm font-medium text-accent">Búsqueda</span>
+  </div>
+
+  <!-- Filtros y opciones -->
+  <div class="mb-6 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+    <div>
+      <h1 id="page-title" class="text-3xl font-bold mb-2">Resultados de búsqueda</h1>
+      <p id="product-count" class="text-sm text-slate-500 dark:text-slate-400">Buscando...</p>
+    </div>
+    
+    <div class="flex gap-2 w-full lg:w-auto">
+      <select id="sort-select" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm">
+        <option value="newest">Más Nuevos</option>
+        <option value="price-low">Menor Precio</option>
+        <option value="price-high">Mayor Precio</option>
+        <option value="popular">Más Popular</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Grid de productos -->
+  <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Se llena dinámicamente -->
+  </div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="hidden text-center py-12">
+    <span class="material-icons-round text-5xl opacity-20">search</span>
+    <h3 class="text-lg font-semibold mt-4">No encontramos productos</h3>
+    <p class="text-sm text-slate-500 dark:text-slate-400" id="empty-message">No hay productos que coincidan con tu búsqueda</p>
+    <a href="./index.html" class="inline-block mt-4 px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90">
+      Volver al Inicio
+    </a>
+  </div>
+</main>
+
+<script type="module">
+  import { getCurrentUser, signOut } from '../scripts/firebase-auth.js';
+  import { getActiveProducts, searchProducts, getProductsByCategory } from '../scripts/firebase-products.js';
+  import { getPublishedBlogs } from '../scripts/firebase-blogs.js';
+  import { renderCategoriesMenu, renderCategoriesMenuMobile, initializeCategoriesMenu } from '../scripts/categories-menu.js';
+  import { CartManager as FirestoreCart } from '../scripts/firebase-cart.js'
+  
+  // Reescritura de enlaces se realiza tras verificar usuario autenticado más abajo
+  // Pre-auth link rewrite block removed (using awaited getCurrentUser below)
+  // Tema manager
+  const themeManager = {
+    getTheme() {
+      return localStorage.getItem('tecno-theme') || 'light';
+    },
+    setTheme(theme) {
+      localStorage.setItem('tecno-theme', theme);
+    },
+    toggleTheme() {
+      const current = this.getTheme();
+      const newTheme = current === 'light' ? 'dark' : 'light';
+      this.setTheme(newTheme);
+      this.applyTheme(newTheme);
+    },
+    applyTheme(theme) {
+      const html = document.documentElement;
+      if (theme === 'dark') {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+      }
+    }
+  };
+
+  // Renderizar menús dinámicos de categorías (desktop y móvil)
+  const categoriesBarEl = document.getElementById('categories-bar');
+  if (categoriesBarEl) {
+    categoriesBarEl.innerHTML = renderCategoriesMenu();
+  }
+  const mobileCategoriesEl = document.getElementById('mobile-categories-container');
+  if (mobileCategoriesEl) {
+    mobileCategoriesEl.innerHTML = renderCategoriesMenuMobile();
+  }
+  initializeCategoriesMenu();
+
+  // Verificar autenticación y redirigir si es cliente
+  const user = await getCurrentUser();
+  if (user && user.role === 'cliente') {
+    // Reescribir enlaces de categorías para apuntar a customer dashboard
+    const categoryLinks = document.querySelectorAll('a[href*="./products-by-category.html"]');
+    categoryLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && href.includes('?')) {
+        const params = href.split('?')[1];
+        link.setAttribute('href', `../customer_dashboard/products-by-category.html?${params}`);
+      }
+    });
+  }
+
+  // Inicializar tema
+  const savedTheme = localStorage.getItem('tecno-theme') || 'light';
+  themeManager.applyTheme(savedTheme);
+
+  function updateThemeIcon() {
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+      const icon = toggle.querySelector('.material-icons-round');
+      if (icon) {
+        icon.textContent = themeManager.getTheme() === 'dark' ? 'dark_mode' : 'light_mode';
+      }
+    }
+  }
+
+  updateThemeIcon();
+
+  // Toggle de tema
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    themeManager.toggleTheme();
+    updateThemeIcon();
+  });
+
+  // Toggle del menú móvil
+  const menuToggle = document.getElementById('menu-toggle');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (mobileMenu) {
+        mobileMenu.classList.toggle('hidden');
+      }
+    });
+  }
+
+  // Toggle para expandir/contraer categorías en móvil
+  window.toggleMobileCategory = (button) => {
+    const categoryDiv = button.parentElement;
+    const itemsDiv = categoryDiv.querySelector('div[class*="ml-4"]');
+    if (itemsDiv) {
+      itemsDiv.classList.toggle('hidden');
+      const icon = button.querySelector('.material-icons-round:last-child');
+      if (icon) {
+        icon.textContent = itemsDiv.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+      }
+    }
+  };
+
+  // Search functionality
+  const searchButton = document.getElementById('search-button');
+  const floatingSearchBtn = document.getElementById('floating-search');
+  const searchModal = document.getElementById('search-modal');
+  const closeSearchBtn = document.getElementById('close-search');
+  const searchInput = document.getElementById('search-input');
+
+  if (searchButton) {
+    searchButton.addEventListener('click', () => {
+      searchModal.classList.remove('hidden');
+      searchInput.focus();
+    });
+  }
+
+  if (floatingSearchBtn) {
+    floatingSearchBtn.addEventListener('click', () => {
+      searchModal.classList.remove('hidden');
+      searchInput.focus();
+    });
+  }
+
+  if (closeSearchBtn) {
+    closeSearchBtn.addEventListener('click', () => {
+      searchModal.classList.add('hidden');
+    });
+  }
+
+  if (searchModal) {
+    searchModal.addEventListener('click', (e) => {
+      if (e.target === searchModal) {
+        searchModal.classList.add('hidden');
+      }
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const query = searchInput.value.trim();
+        if (query) {
+          window.location.href = `./search-results.html?q=${encodeURIComponent(query)}`;
+        }
+      }
+    });
+
+    searchInput.addEventListener('input', async (e) => {
+      const query = e.target.value.trim();
+      const suggestionsContainer = document.getElementById('search-suggestions');
+
+      if (!query) {
+        suggestionsContainer.innerHTML = '';
+        return;
+      }
+
+      try {
+        const results = await searchProducts(query);
+        const limitResults = results.slice(0, 5);
+
+        suggestionsContainer.innerHTML = limitResults.map(p => `
+          <a href="./product-detail.html?id=${p.id}" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 border-b border-slate-200 dark:border-white/10 text-sm">
+            <img src="${p.images?.[0] || 'https://via.placeholder.com/40'}" alt="${p.name}" class="w-10 h-10 object-cover rounded">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium line-clamp-1">${p.name}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">$${p.price?.toFixed(2) || '0.00'}</p>
+            </div>
+          </a>
+        `).join('');
+      } catch (error) {
+        console.error('Error searching:', error);
+      }
+    });
+  }
+
+  // Obtener parámetro de búsqueda desde URL
+  const params = new URLSearchParams(window.location.search);
+  const searchQuery = params.get('q') || '';
+
+  if (searchQuery) {
+    performSearch(searchQuery);
+  }
+
+  async function performSearch(query) {
+    try {
+      const results = await searchProducts(query);
+
+      document.getElementById('page-title').textContent = `Resultados para "${query}"`;
+      document.getElementById('product-count').textContent = `Encontramos ${results.length} producto${results.length !== 1 ? 's' : ''}`;
+
+      if (results.length === 0) {
+        document.getElementById('products-grid').classList.add('hidden');
+        document.getElementById('empty-state').classList.remove('hidden');
+        document.getElementById('empty-message').textContent = `No encontramos productos para "${query}"`;
+        return;
+      }
+
+      document.getElementById('products-grid').classList.remove('hidden');
+      document.getElementById('empty-state').classList.add('hidden');
+
+      renderProducts(results);
+
+      // Sort handler
+      document.getElementById('sort-select').addEventListener('change', (e) => {
+        const sorted = sortProducts(results, e.target.value);
+        renderProducts(sorted);
+      });
+    } catch (error) {
+      console.error('Error performando búsqueda:', error);
+    }
+  }
+
+  function sortProducts(products, sortType) {
+    const sorted = [...products];
+    switch(sortType) {
+      case 'price-low':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'price-high':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'newest':
+      default:
+        return sorted;
+    }
+  }
+
+  function renderProducts(products) {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = products.map(p => `
+      <div class="flex flex-col gap-3 group bg-white dark:bg-slate-900 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+        <a href="./product-detail.html?id=${p.id}" class="relative aspect-square bg-slate-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center p-6 cursor-pointer block">
+          <img src="${p.images?.[0] || 'https://via.placeholder.com/400'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all"></div>
+        </a>
+        <div class="p-4">
+          <h4 class="font-semibold text-sm line-clamp-2">${p.name}</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">${p.category}</p>
+          <div class="flex items-center justify-between gap-2">
+            <p class="font-bold text-accent">$${p.price?.toFixed(2) || '0.00'}</p>
+            <a href="./product-detail.html?id=${p.id}" class="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-accent hover:text-white transition-colors">
+              Ver
+            </a>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Actualizar Auth UI
+  function updateAuthUI() {
+    const container = document.getElementById('auth-container');
+    if (!container) return;
+
+    getCurrentUser().then(user => {
+      if (user) {
+        container.innerHTML = `
+          <div class="relative group">
+            <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+              <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">
+                ${user.name?.charAt(0) || 'U'}
+              </div>
+            </button>
+            <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl hidden group-hover:block overflow-hidden z-[9999]">
+              <div class="px-4 py-3 border-b border-slate-100 dark:border-white/10">
+                <p class="text-sm font-medium">${user.name || 'Usuario'}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${user.email}</p>
+              </div>
+              <a href="${user.role === 'admin' ? '../admin_dashboard/dashboard.html' : '../customer_dashboard/clientDashboard.html'}" class="flex items-center px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-white/10 border-b border-slate-100 dark:border-white/10">
+                <span class="material-icons-round text-lg mr-2">dashboard</span> Mi Dashboard
+              </a>
+              <button onclick="window.logout()" class="w-full text-left flex items-center px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20">
+                <span class="material-icons-round text-lg mr-2">logout</span> Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    });
+  }
+
+  window.logout = async () => {
+    try {
+      await signOut();
+      location.reload();
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  // Inicializar
+  updateAuthUI();
+
+  // Toggle menu mobile
+  document.getElementById('menu-toggle').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+  });
+
+  // Actualizar contador del carrito (Firestore y fallback localStorage)
+  async function updateCartCount() {
+    const badge = document.querySelector('[data-cart-count]');
+    if (!badge) return;
+
+    try {
+      const count = await FirestoreCart.getCartItemCount();
+      if (count > 0) {
+        badge.textContent = count;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    } catch (err) {
+      // Fallback a localStorage
+      try {
+        const raw = localStorage.getItem('tecno_things_cart');
+        const items = raw ? JSON.parse(raw) : [];
+        const count = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
+        if (count > 0) {
+          badge.textContent = count;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      } catch (e) {
+        // Si todo falla, ocultar badge
+        badge.classList.add('hidden');
+      }
+    }
+  }
+
+  // Inicializar
+  updateAuthUI();
+  updateCartCount();
+</script>
+
+<!-- FOOTER -->
+<footer class="bg-slate-900 dark:bg-black text-white mt-20 border-t border-slate-800">
+  <div class="px-4 py-16 lg:px-6 max-w-6xl mx-auto">
+    <!-- Footer Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+      <!-- Brand & Contact Info -->
+      <div>
+        <h3 class="text-2xl font-bold mb-4">TECNO THINGS</h3>
+        <p class="text-slate-400 mb-6">Tienda autorizada / Pc Gamer / Streaming</p>
+        
+        <!-- Contact Information -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-start gap-3">
+            <span class="material-icons-round text-accent mt-1 flex-shrink-0">location_on</span>
+            <span class="text-slate-400 text-sm">Matriz Tecnothings Centro comercial San Felipe, Guayaquil, Ecuador 090101</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">phone</span>
+            <span class="text-slate-400 text-sm">+593 96 287 3167</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">mail</span>
+            <span class="text-slate-400 text-sm">info@techthings.com</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">schedule</span>
+            <span class="text-slate-400 text-sm">Lun-Vie: 9AM-6PM</span>
+          </div>
+        </div>
+
+        <!-- Social Links -->
+        <div class="flex gap-4">
+          <a href="https://www.instagram.com/tecnothings_ec/" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">camera_alt</span>
+          </a>
+          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">language</span>
+          </a>
+          <a href="mailto:info@techthings.com" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">mail</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Productos -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Productos</h4>
+        <ul class="space-y-3">
+          <li><a href="./products-by-category.html?category=perifericos" class="text-slate-400 hover:text-white transition-colors">Periféricos</a></li>
+          <li><a href="./products-by-category.html?category=monitores" class="text-slate-400 hover:text-white transition-colors">Monitores</a></li>
+          <li><a href="./products-by-category.html?category=hardware" class="text-slate-400 hover:text-white transition-colors">Hardware</a></li>
+          <li><a href="./products-by-category.html?category=laptops" class="text-slate-400 hover:text-white transition-colors">Laptops</a></li>
+          <li><a href="./products-by-category.html?category=ofertas" class="text-slate-400 hover:text-white transition-colors">Ofertas</a></li>
+        </ul>
+      </div>
+
+      <!-- Información -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Información</h4>
+        <ul class="space-y-3">
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Sobre nosotros</a></li>
+          <li><a href="./blogs.html" class="text-slate-400 hover:text-white transition-colors">Blog</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Política de privacidad</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Términos de servicio</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Contacto</a></li>
+        </ul>
+      </div>
+
+      <!-- Google Maps -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Ubicación</h4>
+        <div class="rounded-lg overflow-hidden border border-slate-700 h-64 w-full">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.5779746282846!2d-79.9309434!3d-2.1294174!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d733792952ed1:0x2fda88783fa806f2!2sTECNOTHINGS%20GYE!5e0!3m2!1ses!2sec!4v1707593400000" 
+            allowfullscreen="" 
+            aria-hidden="false" 
+            tabindex="0">
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-slate-800 pt-8 mb-8"></div>
+
+    <!-- Footer Bottom -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <p class="text-slate-400 text-sm">© 2026 Tecno Things. Todos los derechos reservados.</p>
+      <div class="flex items-center gap-4">
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Política de Cookies</a>
+        <span class="text-slate-600">|</span>
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Preferencias</a>
+      </div>
+      <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+        Volver arriba <span class="material-icons-round">arrow_upward</span>
+      </button>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

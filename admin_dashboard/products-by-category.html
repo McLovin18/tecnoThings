@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Productos por Categoría | Admin</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#3b82f6",
+            "background-light": "#f8fafc",
+            "background-dark": "#09090b",
+            accent: "#3b82f6"
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          }
+        },
+      },
+    };
+  </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-28 lg:pb-6">
+
+<!-- Protección de ruta -->
+<script type="module">
+  import { protectRoute } from '../scripts/route-protection.js';
+  await protectRoute('admin');
+</script>
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-30 px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <button id="menu-toggle" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10" type="button">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <a href="./dashboard.html" class="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Admin Panel</span>
+        <h1 class="text-xl font-extrabold tracking-tighter leading-none dark:text-white">TECNO THINGS</h1>
+      </a>
+    </div>
+    <div class="hidden lg:flex items-center gap-6">
+      <a href="./dashboard.html" class="text-sm font-medium hover:text-accent transition-colors">Dashboard</a>
+      <a href="./products.html" class="text-sm font-medium hover:text-accent transition-colors">Productos</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <div id="auth-container"></div>
+    </div>
+  </div>
+  </nav>
+
+<!-- CATEGORIES BAR (desktop) -->
+<div class="hidden lg:block sticky top-16 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-3">
+  <div id="categories-bar" class="max-w-full overflow-visible"><div class="flex items-center justify-center gap-6 max-w-full overflow-visible"></div></div>
+  </div>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="hidden lg:hidden fixed top-16 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 z-40 max-h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+  <div class="px-4 py-2 space-y-1 flex-shrink-0">
+    <a href="./dashboard.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Inicio</a>
+    <a href="./blogs.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Blogs</a>
+    <a href="./products.html" class="block px-4 py-3 rounded-lg bg-accent/10 text-accent transition-colors text-sm font-medium">Categorías</a>
+    <a href="./settings.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Mi Cuenta</a>
+  </div>
+  <div id="mobile-categories-container" class="px-4 py-3 space-y-1 flex-1 min-h-0 overflow-y-auto"></div>
+</div>
+
+<!-- DESKTOP SIDEBAR -->
+<div class="hidden md:flex fixed left-0 top-16 bottom-0 w-48 z-50 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex-col items-center pt-6 px-4 gap-4">
+
+  <a href="./dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors w-full">
+    <span class="material-icons-round text-xl">grid_view</span>
+    <span class="text-sm font-medium">Dashboard</span>
+  </a>
+  <a href="./products.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary transition-colors w-full">
+    <span class="material-icons-round text-xl">inventory_2</span>
+    <span class="text-sm font-medium">Productos</span>
+  </a>
+  <a href="./orders.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors w-full">
+    <span class="material-icons-round text-xl">shopping_cart</span>
+    <span class="text-sm font-medium">Pedidos</span>
+  </a>
+  <a href="./customers.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors w-full">
+    <span class="material-icons-round text-xl">groups</span>
+    <span class="text-sm font-medium">Clientes</span>
+  </a>
+  <a href="./settings.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors mt-auto mb-6 w-full">
+    <span class="material-icons-round text-xl">settings</span>
+    <span class="text-sm font-medium">Ajustes</span>
+  </a>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="md:ml-48 px-3 sm:px-4 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
+  <section>
+    <h1 id="page-title" class="text-2xl sm:text-3xl font-bold">Productos por Categoría</h1>
+    <p id="page-subtitle" class="text-slate-500 dark:text-zinc-400 text-xs sm:text-sm">Filtra por categoría, subcategoría y sub-subcategoría</p>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <aside class="lg:col-span-1">
+      <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 space-y-4 sticky top-20">
+        <div>
+          <label class="text-xs font-bold mb-2 block">Buscar</label>
+          <input id="search-input" type="text" placeholder="Nombre del producto..." class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900">
+        </div>
+        <div>
+          <label class="text-xs font-bold mb-2 block">Precio (máx)</label>
+          <input id="price-slider" type="range" min="0" max="5000" class="w-full">
+          <div class="flex justify-between text-xs text-slate-500 mt-2">
+            <span>Mín: $<span id="min-price">0</span></span>
+            <span>Máx: $<span id="max-price">5000</span></span>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-bold mb-2 block">Ordenar</label>
+          <select id="sort-select" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900">
+            <option value="newest">Más nuevos</option>
+            <option value="price-low">Precio: Menor a Mayor</option>
+            <option value="price-high">Precio: Mayor a Menor</option>
+          </select>
+        </div>
+      </div>
+    </aside>
+    <section class="lg:col-span-3">
+      <div id="loading" class="text-center py-12">
+        <span class="material-icons-round animate-spin text-4xl">sync</span>
+        <p class="mt-4 text-slate-500">Cargando productos...</p>
+      </div>
+      <div id="products-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      <div id="empty-state" class="hidden text-center py-12">
+        <p class="text-slate-500">No se encontraron productos.</p>
+      </div>
+    </section>
+  </section>
+</main>
+
+<!-- SCRIPT: Datos y render -->
+<script type="module">
+  import { getAllProducts, getProductsByCategoryFlexible } from '../scripts/firebase-products.js';
+  import { CATEGORIES_STRUCTURE } from '../scripts/categories.js';
+
+  const params = new URLSearchParams(window.location.search);
+  const categoryParam = params.get('category') || '';
+  const subcategoryParam = params.get('subcategory') || '';
+  const subsubcategoryParam = params.get('subsubcategory') || '';
+  const initialId = subsubcategoryParam || subcategoryParam || categoryParam || '';
+
+  let allProducts = [];
+  let filteredProducts = [];
+
+  function setTitles() {
+    const titleEl = document.getElementById('page-title');
+    const subtitleEl = document.getElementById('page-subtitle');
+    let title = 'Productos por Categoría';
+    let subtitle = '';
+    if (categoryParam) {
+      const cat = Object.values(CATEGORIES_STRUCTURE).find(c => c.id === categoryParam);
+      if (cat) title = `Categoría: ${cat.name}`;
+      if (subcategoryParam && cat && cat.subcategories?.[subcategoryParam]) {
+        subtitle = `Subcategoría: ${cat.subcategories[subcategoryParam].name}`;
+      }
+      if (subsubcategoryParam && cat && cat.subcategories?.[subcategoryParam]?.subsubcategories?.[subsubcategoryParam]) {
+        subtitle += subtitle ? ' • ' : '';
+        subtitle += `Sub-subcategoría: ${cat.subcategories[subcategoryParam].subsubcategories[subsubcategoryParam].name}`;
+      }
+    }
+    titleEl.textContent = title;
+    subtitleEl.textContent = subtitle || 'Filtra por categoría, subcategoría y sub-subcategoría';
+  }
+
+  async function loadProducts() {
+    try {
+      if (initialId) {
+        allProducts = await getProductsByCategoryFlexible(initialId);
+        console.log('Admin: productos por categoría (flex)', initialId, '→', allProducts.length);
+      } else {
+        allProducts = await getAllProducts();
+        console.log('Admin: todos los productos →', allProducts.length);
+      }
+      applyFilters();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  function applyFilters() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const maxPrice = parseInt(document.getElementById('price-slider').value || '5000');
+    const sort = document.getElementById('sort-select').value;
+
+    const classify = (id) => {
+      if (!id) return { level: 'none' };
+      if (CATEGORIES_STRUCTURE[id]) return { level: 'root', id };
+      for (const main of Object.values(CATEGORIES_STRUCTURE)) {
+        const subs = main.subcategories || {};
+        if (subs[id]) return { level: 'sub', id, parent: main.id };
+        for (const s of Object.values(subs)) {
+          const third = s.subsubcategories || {};
+          if (third[id]) return { level: 'third', id, parent: s.id, root: main.id };
+        }
+      }
+      return { level: 'unknown', id };
+    };
+
+    const sel = classify(initialId);
+    console.log('Admin filtro categoría →', sel);
+
+    filteredProducts = allProducts.filter(p => {
+      const matchSearch = (p.name || '').toLowerCase().includes(searchTerm);
+      const matchPrice = (p.price ?? 0) <= maxPrice;
+      let matchCategory = true;
+      if (initialId) {
+        if (sel.level === 'root') {
+          matchCategory = (
+            p.categoryRoot === sel.id ||
+            p.category === sel.id ||
+            (Array.isArray(p.categoryPath) && p.categoryPath.includes(sel.id))
+          );
+        } else if (sel.level === 'sub') {
+          matchCategory = (
+            p.subcategory === sel.id || p.category === sel.id
+          ) && (!p.subsubcategory);
+        } else if (sel.level === 'third') {
+          matchCategory = (
+            p.subsubcategory === sel.id || p.category === sel.id
+          );
+        } else {
+          matchCategory = (
+            p.category === initialId ||
+            p.subcategory === initialId ||
+            p.subsubcategory === initialId
+          );
+        }
+      }
+      return matchCategory && matchSearch && matchPrice;
+    });
+
+    if (sort === 'price-low') filteredProducts.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+    if (sort === 'price-high') filteredProducts.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+    if (sort === 'newest') filteredProducts.sort((a, b) => new Date(b.updatedAt?.toDate?.() || b.updatedAt || 0) - new Date(a.updatedAt?.toDate?.() || a.updatedAt || 0));
+
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('products-grid');
+    const loading = document.getElementById('loading');
+    const empty = document.getElementById('empty-state');
+
+    loading.classList.add('hidden');
+
+    if (filteredProducts.length === 0) {
+      grid.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    grid.innerHTML = filteredProducts.map(p => `
+      <a href="./product-detail.html?id=${p.id}" class="bg-white dark:bg-slate-800 rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow">
+        <img src="${(p.images && p.images[0]) || p.image || ''}" alt="${p.name}" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <span class="inline-block text-xs bg-accent/10 text-accent px-2 py-1 rounded mb-2">${p.category}</span>
+          <h3 class="font-bold text-sm line-clamp-2">${p.name}</h3>
+          <p class="text-accent font-bold mt-2">$${(p.price ?? 0).toFixed(2)}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Stock: ${p.stock ?? 0}</p>
+        </div>
+      </a>
+    `).join('');
+
+    grid.classList.remove('hidden');
+    empty.classList.add('hidden');
+  }
+
+  document.getElementById('search-input').addEventListener('input', applyFilters);
+  document.getElementById('price-slider').addEventListener('change', function() {
+    document.getElementById('max-price').textContent = this.value;
+    applyFilters();
+  });
+  document.getElementById('sort-select').addEventListener('change', applyFilters);
+
+  setTitles();
+  loadProducts();
+</script>
+
+<!-- SCRIPT: Barra de categorías (desktop) horizontal con dropdowns -->
+<script type="module">
+  import { renderCategoriesBarHorizontal } from '../scripts/categories-menu.js';
+  const container = document.querySelector('#categories-bar > div.flex');
+  if (container && container.childElementCount === 0) {
+    container.innerHTML = renderCategoriesBarHorizontal('./');
+  }
+</script>
+
+<!-- SCRIPT: Menú de categorías (móvil) -->
+<script type="module">
+  import { renderCategoriesMenuMobile, initializeCategoriesMenu } from '../scripts/categories-menu.js';
+  const mobileCategoriesEl = document.getElementById('mobile-categories-container');
+  if (mobileCategoriesEl && mobileCategoriesEl.childElementCount === 0) {
+    mobileCategoriesEl.innerHTML = renderCategoriesMenuMobile();
+  }
+  initializeCategoriesMenu();
+</script>
+
+</body>
+</html>

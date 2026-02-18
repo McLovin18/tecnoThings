@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Blog - Tecno Things</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#ffffff",
+            "background-light": "#f8fafc",
+            "background-dark": "#000000",
+            accent: "#3b82f6"
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "12px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .blog-content {
+      line-height: 1.8;
+      font-size: 1.05rem;
+    }
+    .blog-content h2 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: inherit;
+    }
+    .blog-content p {
+      margin-bottom: 1rem;
+      color: inherit;
+    }
+    .blog-content strong {
+      font-weight: 700;
+    }
+    .blog-content em {
+      font-style: italic;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-24">
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-40 px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <button id="menu-toggle" onclick="window.toggleMobileMenu ? window.toggleMobileMenu() : document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10" type="button">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <a href="./blogs.html" class="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Blogs</span>
+        <h1 class="text-xl font-extrabold tracking-tighter leading-none">TECNO THINGS</h1>
+      </a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <a href="./blogs.html" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+        Volver a Blogs
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="flex-grow px-4 py-12 lg:px-6">
+  <article id="blog-article" class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div id="blog-header" class="mb-10">
+      <div id="blog-header-bg" class="h-64 rounded-2xl flex items-center justify-center mb-8 overflow-hidden">
+        <!-- Fondo de color con icono -->
+      </div>
+      
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <span id="blog-category-badge" class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30"></span>
+          <span id="blog-date-label" class="text-sm text-slate-500 dark:text-slate-400"></span>
+        </div>
+        
+        <h1 id="blog-title" class="text-4xl lg:text-5xl font-bold tracking-tight mb-4"></h1>
+        <p id="blog-description" class="text-lg text-slate-600 dark:text-slate-300 mb-6"></p>
+        
+        <div class="flex items-center gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <div>
+            <p class="text-sm font-semibold">Por <span id="blog-author"></span></p>
+            <p id="blog-read-time" class="text-sm text-slate-500 dark:text-slate-400">Tiempo de lectura: ~3 min</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div id="blog-content" class="prose dark:prose-invert max-w-none blog-content mb-12">
+      <!-- El contenido se cargará aquí -->
+    </div>
+
+    <!-- Footer -->
+    <div class="pt-8 border-t border-slate-200 dark:border-slate-700">
+      <a href="./blogs.html" class="inline-flex items-center gap-2 text-accent hover:text-blue-600 font-semibold transition-colors">
+        <span class="material-icons-round">arrow_back</span>
+        Volver a todos los blogs
+      </a>
+    </div>
+  </article>
+
+  <!-- Otros blogs relacionados -->
+  <section class="max-w-3xl mx-auto mt-20 pt-12 border-t border-slate-200 dark:border-slate-700">
+    <h2 class="text-3xl font-bold mb-8">Otros artículos</h2>
+    <div id="related-blogs" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Los blogs relacionados se cargarán aquí -->
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-slate-900 dark:bg-black text-white mt-20 border-t border-slate-800">
+  <div class="px-4 py-16 lg:px-6 max-w-6xl mx-auto">
+    <!-- Footer Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+      <!-- Brand & Contact Info -->
+      <div>
+        <h3 class="text-2xl font-bold mb-4">TECNO THINGS</h3>
+        <p class="text-slate-400 mb-6">Tienda autorizada / Pc Gamer / Streaming</p>
+        
+        <!-- Contact Information -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-start gap-3">
+            <span class="material-icons-round text-accent mt-1 flex-shrink-0">location_on</span>
+            <span class="text-slate-400 text-sm">Matriz Tecnothings Centro comercial San Felipe, Guayaquil, Ecuador 090101</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">phone</span>
+            <span class="text-slate-400 text-sm">+593 96 287 3167</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">mail</span>
+            <span class="text-slate-400 text-sm">info@techthings.com</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">schedule</span>
+            <span class="text-slate-400 text-sm">Lun-Vie: 9AM-6PM</span>
+          </div>
+        </div>
+        
+        <!-- Social Links -->
+        <div class="flex gap-4">
+          <a href="https://www.instagram.com/tecnothings_ec/" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">camera_alt</span>
+          </a>
+          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">language</span>
+          </a>
+          <a href="mailto:info@techthings.com" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">mail</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Productos -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Productos</h4>
+        <ul class="space-y-3">
+          <li><a href="./tecno_things_landing_page/products-by-category.html?category=perifericos" class="text-slate-400 hover:text-white transition-colors">Periféricos</a></li>
+          <li><a href="./tecno_things_landing_page/products-by-category.html?category=monitores" class="text-slate-400 hover:text-white transition-colors">Monitores</a></li>
+          <li><a href="./tecno_things_landing_page/products-by-category.html?category=hardware" class="text-slate-400 hover:text-white transition-colors">Hardware</a></li>
+          <li><a href="./tecno_things_landing_page/products-by-category.html?category=laptops" class="text-slate-400 hover:text-white transition-colors">Laptops</a></li>
+          <li><a href="./tecno_things_landing_page/products-by-category.html?category=ofertas" class="text-slate-400 hover:text-white transition-colors">Ofertas</a></li>
+        </ul>
+      </div>
+
+      <!-- Información -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Información</h4>
+        <ul class="space-y-3">
+          <li><a href="./tecno_things_landing_page/index.html" class="text-slate-400 hover:text-white transition-colors">Sobre nosotros</a></li>
+          <li><a href="./blogs.html" class="text-slate-400 hover:text-white transition-colors">Blog</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Política de privacidad</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Términos de servicio</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Contacto</a></li>
+        </ul>
+      </div>
+
+      <!-- Ubicación / Google Maps -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Ubicación</h4>
+        <div class="rounded-lg overflow-hidden border border-slate-700 h-64 w-full">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.5779746282846!2d-79.9309434!3d-2.1294174!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d733792952ed1:0x2fda88783fa806f2!2sTECNOTHINGS%20GYE!5e0!3m2!1ses!2sec!4v1707593400000" 
+            allowfullscreen="" 
+            aria-hidden="false" 
+            tabindex="0">
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-slate-800 pt-8 mb-8"></div>
+
+    <!-- Footer Bottom -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <p class="text-slate-400 text-sm">© 2026 Tecno Things. Todos los derechos reservados.</p>
+      <div class="flex items-center gap-4">
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Política de Cookies</a>
+        <span class="text-slate-600">|</span>
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Preferencias</a>
+      </div>
+      <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+        Volver arriba <span class="material-icons-round">arrow_upward</span>
+      </button>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Colores disponibles
+  const colorMap = {
+    blue: { from: 'from-blue-500', to: 'to-blue-600', badge: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
+    purple: { from: 'from-purple-500', to: 'to-purple-600', badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' },
+    green: { from: 'from-green-500', to: 'to-green-600', badge: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' },
+    orange: { from: 'from-orange-500', to: 'to-orange-600', badge: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' },
+    red: { from: 'from-red-500', to: 'to-red-600', badge: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' },
+    cyan: { from: 'from-cyan-500', to: 'to-cyan-600', badge: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400' },
+    pink: { from: 'from-pink-500', to: 'to-pink-600', badge: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400' },
+    indigo: { from: 'from-indigo-500', to: 'to-indigo-600', badge: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' }
+  };
+
+  function loadBlog() {
+    const params = new URLSearchParams(window.location.search);
+    const blogId = parseInt(params.get('id'));
+    
+    const blogs = JSON.parse(localStorage.getItem('tecno_blogs') || '[]');
+    const blog = blogs.find(b => b.id === blogId);
+    
+    if (!blog) {
+      document.getElementById('blog-article').innerHTML = '<div class="text-center py-12"><h2 class="text-2xl font-bold">Blog no encontrado</h2><p class="text-slate-600 dark:text-slate-300 mt-2">El artículo que buscas no existe.</p></div>';
+      return;
+    }
+
+    // Rellenar datos
+    document.getElementById('blog-title').textContent = blog.title;
+    document.getElementById('blog-description').textContent = blog.description;
+    document.getElementById('blog-content').innerHTML = blog.content;
+    document.getElementById('blog-author').textContent = blog.author || 'Tecno Things';
+    document.getElementById('blog-date-label').textContent = blog.date;
+    
+    const categoryBadge = document.getElementById('blog-category-badge');
+    categoryBadge.textContent = blog.category;
+    const colors = colorMap[blog.color] || colorMap.blue;
+    categoryBadge.className = `text-xs font-semibold px-3 py-1 rounded-full ${colors.badge}`;
+
+    // Header con color
+    const headerBg = document.getElementById('blog-header-bg');
+    headerBg.className = `h-64 rounded-2xl flex items-center justify-center mb-8 overflow-hidden bg-gradient-to-br ${colors.from} ${colors.to}`;
+    headerBg.innerHTML = `<span class="material-icons-round text-8xl text-white opacity-30">${blog.icon || 'article'}</span>`;
+
+    // Calcular tiempo de lectura
+    const wordCount = blog.content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+    const readTime = Math.ceil(wordCount / 200);
+    document.getElementById('blog-read-time').textContent = `Tiempo de lectura: ~${readTime} min`;
+
+    // Cargar blogs relacionados (otros blogs, excluyendo el actual)
+    const relatedBlogs = blogs.filter(b => b.id !== blogId).slice(0, 3);
+    const relatedContainer = document.getElementById('related-blogs');
+    relatedContainer.innerHTML = '';
+
+    relatedBlogs.forEach(relatedBlog => {
+      const relatedColors = colorMap[relatedBlog.color] || colorMap.blue;
+      const card = document.createElement('div');
+      card.className = 'bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-lg transition-shadow cursor-pointer';
+      card.onclick = () => window.location.href = `./blog-detail.html?id=${relatedBlog.id}`;
+      card.innerHTML = `
+        <div class="h-40 bg-gradient-to-br ${relatedColors.from} ${relatedColors.to} flex items-center justify-center">
+          <span class="material-icons-round text-6xl text-white opacity-30">${relatedBlog.icon || 'article'}</span>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-semibold ${relatedColors.badge} px-2 py-1 rounded-full">${relatedBlog.category}</span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">${relatedBlog.date}</span>
+          </div>
+          <h3 class="text-lg font-bold mb-2">${relatedBlog.title}</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300 line-clamp-2">${relatedBlog.description}</p>
+        </div>
+      `;
+      relatedContainer.appendChild(card);
+    });
+
+    // Setup tema
+    const theme = localStorage.getItem('tecno-theme') || 'light';
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+    
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('tecno-theme', isDark ? 'dark' : 'light');
+    });
+
+    // Actualizar título de la página
+    document.title = `${blog.title} - Tecno Things`;
+  }
+
+  // Cargar blog al abrir la página
+  loadBlog();
+</script>
+
+</body>
+</html>

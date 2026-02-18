@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Tecno Things - Login & Registro</title>
+  
+  <!-- 🔐 SEGURIDAD: Limpiar datos demo antes de cargar nada -->
+  <script>
+    (function() {
+      const demoKeys = ['tecnoThingsUser', 'tecnoThingsUsers'];
+      demoKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          console.warn(`🧹 Eliminando dato demo: ${key}`);
+          localStorage.removeItem(key);
+        }
+      });
+      console.log('✅ Sistema de seguridad: Firebase Only');
+    })();
+  </script>
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#FFFFFF",
+            "background-light": "#F9FAFB",
+            "background-dark": "#000000",
+            "card-dark": "#121212",
+            "input-dark": "#1C1C1E",
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "12px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ios-tab-active {
+      border-bottom: 2px solid white;
+      color: white;
+    }
+    .ios-tab-inactive {
+      color: #6B7280;
+    }
+  </style>
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col items-center justify-start">
+<div id="alert-container" class="fixed top-4 right-4 z-50"></div>
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-30 w-full px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <!-- Hamburger menu (mobile) -->
+      <button id="menu-toggle" onclick="window.toggleMobileMenu ? window.toggleMobileMenu() : document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10" type="button">
+        <span class="material-icons">menu</span>
+      </button>
+
+      <!-- Logo -->
+      <a href="../tecno_things_landing_page/index.html" class="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Tienda Autorizada</span>
+        <h1 class="text-xl font-extrabold tracking-tighter leading-none dark:text-white">TECNO THINGS</h1>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <div class="hidden lg:flex items-center gap-6">
+      <a href="../tecno_things_landing_page/index.html" class="text-sm font-medium hover:text-accent transition-colors">Inicio</a>
+      <a href="../tecno_things_landing_page/blogs.html" class="text-sm font-medium hover:text-accent transition-colors">Blogs</a>
+      <a href="../customer_dashboard/cart.html" class="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons">shopping_bag</span>
+        <span class="absolute top-0 right-0 w-4 h-4 bg-accent text-white text-[10px] font-bold flex items-center justify-center rounded-full">3</span>
+      </a>
+    </div>
+
+    <!-- Auth Section -->
+    <div class="flex items-center gap-3">
+      <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons text-2xl text-accent">person_outline</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="hidden lg:hidden fixed top-16 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 z-40">
+  <div class="px-4 py-2 space-y-1">
+    <a href="../tecno_things_landing_page/index.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Inicio</a>
+    <a href="../tecno_things_landing_page/blogs.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Blogs</a>
+    <a href="../customer_dashboard/cart.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Carrito (3)</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="w-full flex flex-col items-center justify-center p-6 flex-1">
+  <div class="w-full flex flex-col items-center mb-12">
+    <div class="text-center w-full max-w-sm">
+      <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 dark:text-gray-400 mb-2">Bienvenido a</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400">Crea tu cuenta o inicia sesión para continuar</p>
+    </div>
+  </div>
+
+  <div class="w-full max-w-sm flex mb-8 border-b border-gray-200 dark:border-gray-800">
+    <button class="flex-1 pb-3 text-sm font-semibold ios-tab-active transition-all duration-300" id="tab-login" onclick="switchTab('login')">
+      Iniciar Sesión
+    </button>
+    <button class="flex-1 pb-3 text-sm font-semibold ios-tab-inactive transition-all duration-300" id="tab-register" onclick="switchTab('register')">
+      Registrarse
+    </button>
+  </div>
+
+<div class="w-full max-w-sm space-y-6">
+  <!-- LOGIN FORM -->
+  <form class="space-y-5" id="login-form" onsubmit="handleLogin(event)">
+    <div class="space-y-2">
+      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">CORREO ELECTRÓNICO</label>
+      <div class="relative">
+        <span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">mail_outline</span>
+        <input id="login-email" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-input-dark border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-gray-900 dark:text-white placeholder-gray-500 text-sm shadow-sm" placeholder="nombre@ejemplo.com" type="email" required/>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">CONTRASEÑA</label>
+      <div class="relative">
+        <span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">lock_outline</span>
+        <input id="login-password" class="w-full pl-12 pr-12 py-4 bg-white dark:bg-input-dark border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-gray-900 dark:text-white placeholder-gray-500 text-sm shadow-sm" placeholder="••••••••" type="password" required/>
+        <button class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" type="button" onclick="togglePassword('login-password')">
+          <span class="material-icons text-xl">visibility_off</span>
+        </button>
+      </div>
+    </div>
+    <div class="flex justify-end">
+      <button type="button" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-white transition-colors" onclick="window.location.href='/setup-admin.html'">
+        ¿Eres el administrador? Aquí
+      </button>
+    </div>
+    <button class="w-full bg-primary text-black font-bold py-4 rounded-2xl active:scale-[0.98] transition-all shadow-lg hover:shadow-primary/10" type="submit">
+      Iniciar Sesión
+    </button>
+  </form>
+
+  <!-- REGISTER FORM -->
+  <form class="space-y-5 hidden" id="register-form" onsubmit="handleRegister(event)">
+    <div class="space-y-2">
+      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">NOMBRE COMPLETO</label>
+      <div class="relative">
+        <span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">person_outline</span>
+        <input id="register-name" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-input-dark border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-gray-900 dark:text-white placeholder-gray-500 text-sm shadow-sm" placeholder="Tu nombre completo" type="text" required/>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">CORREO ELECTRÓNICO</label>
+      <div class="relative">
+        <span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">mail_outline</span>
+        <input id="register-email" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-input-dark border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-gray-900 dark:text-white placeholder-gray-500 text-sm shadow-sm" placeholder="correo@ejemplo.com" type="email" required/>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">CONTRASEÑA</label>
+      <div class="relative">
+        <span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">lock_outline</span>
+        <input id="register-password" class="w-full pl-12 pr-12 py-4 bg-white dark:bg-input-dark border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-gray-900 dark:text-white placeholder-gray-500 text-sm shadow-sm" placeholder="Crear contraseña" type="password" required/>
+        <button class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" type="button" onclick="togglePassword('register-password')">
+          <span class="material-icons text-xl">visibility_off</span>
+        </button>
+      </div>
+    </div>
+    <button class="w-full bg-primary text-black font-bold py-4 rounded-2xl active:scale-[0.98] transition-all shadow-lg" type="submit">
+      Crear Cuenta
+    </button>
+  </form>
+
+  <div id="loading-container" class="hidden text-center p-6 bg-blue-50 dark:bg-blue-950/30 rounded-2xl border border-blue-200 dark:border-blue-800">
+    <p class="text-sm text-blue-900 dark:text-blue-300 mb-3">Verificando sesión...</p>
+    <div class="flex justify-center">
+      <div class="animate-spin">
+        <span class="material-icons text-blue-600">loading</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<script type="module">
+  import { loginUser, registerUser, getCurrentUser } from '../scripts/firebase-auth.js';
+
+  // Verificar si el usuario ya está autenticado
+  async function checkAuthStatus() {
+    const user = await getCurrentUser();
+    if (user) {
+      // Redirigir automáticamente si ya está logueado
+      if (user.role === 'admin') {
+        window.location.href = '../admin_dashboard/dashboard.html';
+      } else {
+        window.location.href = '../customer_dashboard/clientDashboard.html';
+      }
+    }
+  }
+
+  checkAuthStatus();
+
+  function switchTab(tab) {
+    const loginTab = document.getElementById('tab-login');
+    const registerTab = document.getElementById('tab-register');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    if (tab === 'login') {
+      loginTab.classList.add('ios-tab-active');
+      loginTab.classList.remove('ios-tab-inactive');
+      registerTab.classList.add('ios-tab-inactive');
+      registerTab.classList.remove('ios-tab-active');
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+    } else {
+      registerTab.classList.add('ios-tab-active');
+      registerTab.classList.remove('ios-tab-inactive');
+      loginTab.classList.add('ios-tab-inactive');
+      loginTab.classList.remove('ios-tab-active');
+      registerForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+    }
+  }
+
+  function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('.material-icons');
+    
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = 'visibility';
+    } else {
+      input.type = 'password';
+      icon.textContent = 'visibility_off';
+    }
+  }
+
+  function showAlert(message, type = 'success') {
+    const container = document.getElementById('alert-container');
+    const bgColor = type === 'success' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30';
+    const textColor = type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400';
+    
+    const alert = document.createElement('div');
+    alert.className = `${bgColor} ${textColor} px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in mb-2`;
+    alert.innerHTML = `
+      <span class="material-icons text-lg">${type === 'success' ? 'check_circle' : 'error'}</span>
+      <span class="text-sm font-medium">${message}</span>
+    `;
+    
+    container.appendChild(alert);
+    
+    setTimeout(() => {
+      alert.remove();
+    }, 4000);
+  }
+
+  function handleLogin(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const form = document.getElementById('login-form');
+    const button = form.querySelector('button[type="submit"]');
+    
+    // Validar campos
+    if (!email || !password) {
+      showAlert('Por favor completa todos los campos', 'error');
+      return;
+    }
+
+    // Deshabilitar botón durante la carga
+    button.disabled = true;
+    button.innerHTML = '<span class="material-icons animate-spin">loading</span> Iniciando sesión...';
+
+    loginUser(email, password)
+      .then(result => {
+        if (result.success) {
+          showAlert(`¡Bienvenido ${result.user.displayName || result.user.email}!`, 'success');
+          setTimeout(() => {
+            if (result.user.role === 'admin') {
+              window.location.href = '../admin_dashboard/dashboard.html';
+            } else {
+              window.location.href = '../customer_dashboard/clientDashboard.html';
+            }
+          }, 1500);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert(error.message, 'error');
+        button.disabled = false;
+        button.innerHTML = 'Iniciar Sesión';
+      });
+  }
+
+  function handleRegister(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('register-name').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
+    const form = document.getElementById('register-form');
+    const button = form.querySelector('button[type="submit"]');
+    
+    // Validar campos
+    if (!name || !email || !password) {
+      showAlert('Por favor completa todos los campos', 'error');
+      return;
+    }
+
+    if (password.length < 6) {
+      showAlert('La contraseña debe tener al menos 6 caracteres', 'error');
+      return;
+    }
+
+    // Deshabilitar botón durante la carga
+    button.disabled = true;
+    button.innerHTML = '<span class="material-icons animate-spin">loading</span> Creando cuenta...';
+
+    registerUser(email, password, { name })
+      .then(result => {
+        if (result.success) {
+          showAlert(`¡Bienvenido ${name}! Tu cuenta ha sido creada.`, 'success');
+          // Limpiar formulario
+          form.reset();
+          setTimeout(() => {
+            window.location.href = '../customer_dashboard/clientDashboard.html';
+          }, 1500);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert(error.message, 'error');
+        button.disabled = false;
+        button.innerHTML = 'Crear Cuenta';
+      });
+  }
+
+  // Exponer funciones globales
+  window.switchTab = switchTab;
+  window.togglePassword = togglePassword;
+  window.handleLogin = handleLogin;
+  window.handleRegister = handleRegister;
+
+  // Toggle mobile menu
+  document.getElementById('menu-toggle').addEventListener('click', () => {
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenu.classList.toggle('hidden');
+  });
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+</style>
+
+<!-- FOOTER -->
+<footer class="bg-slate-900 dark:bg-black text-white mt-20 border-t border-slate-800">
+  <div class="px-4 py-16 lg:px-6 max-w-6xl mx-auto">
+    <!-- Footer Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+      <!-- Brand & Contact Info -->
+      <div>
+        <h3 class="text-2xl font-bold mb-4">TECNO THINGS</h3>
+        <p class="text-slate-400 mb-6">Tienda autorizada / Pc Gamer / Streaming</p>
+        
+        <!-- Contact Information -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-start gap-3">
+            <span class="material-icons-round text-accent mt-1 flex-shrink-0">location_on</span>
+            <span class="text-slate-400 text-sm">Matriz Tecnothings Centro comercial San Felipe, Guayaquil, Ecuador 090101</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">phone</span>
+            <span class="text-slate-400 text-sm">+593 96 287 3167</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">mail</span>
+            <span class="text-slate-400 text-sm">info@techthings.com</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">schedule</span>
+            <span class="text-slate-400 text-sm">Lun-Vie: 9AM-6PM</span>
+          </div>
+        </div>
+        
+        <!-- Social Links -->
+        <div class="flex gap-4">
+          <a href="https://www.instagram.com/tecnothings_ec/" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">camera_alt</span>
+          </a>
+          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">language</span>
+          </a>
+          <a href="mailto:info@techthings.com" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">mail</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Productos -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Productos</h4>
+        <ul class="space-y-3">
+          <li><a href="../tecno_things_landing_page/products-by-category.html?category=perifericos" class="text-slate-400 hover:text-white transition-colors">Periféricos</a></li>
+          <li><a href="../tecno_things_landing_page/products-by-category.html?category=monitores" class="text-slate-400 hover:text-white transition-colors">Monitores</a></li>
+          <li><a href="../tecno_things_landing_page/products-by-category.html?category=hardware" class="text-slate-400 hover:text-white transition-colors">Hardware</a></li>
+          <li><a href="../tecno_things_landing_page/products-by-category.html?category=laptops" class="text-slate-400 hover:text-white transition-colors">Laptops</a></li>
+          <li><a href="../tecno_things_landing_page/products-by-category.html?category=ofertas" class="text-slate-400 hover:text-white transition-colors">Ofertas</a></li>
+        </ul>
+      </div>
+
+      <!-- Información -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Información</h4>
+        <ul class="space-y-3">
+          <li><a href="../tecno_things_landing_page/index.html" class="text-slate-400 hover:text-white transition-colors">Sobre nosotros</a></li>
+          <li><a href="../blogs.html" class="text-slate-400 hover:text-white transition-colors">Blog</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Política de privacidad</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Términos de servicio</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Contacto</a></li>
+        </ul>
+      </div>
+
+      <!-- Ubicación / Google Maps -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Ubicación</h4>
+        <div class="rounded-lg overflow-hidden border border-slate-700 h-64 w-full">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.5779746282846!2d-79.9309434!3d-2.1294174!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d733792952ed1:0x2fda88783fa806f2!2sTECNOTHINGS%20GYE!5e0!3m2!1ses!2sec!4v1707593400000" 
+            allowfullscreen="" 
+            aria-hidden="false" 
+            tabindex="0">
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-slate-800 pt-8 mb-8"></div>
+
+    <!-- Footer Bottom -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <p class="text-slate-400 text-sm">© 2026 Tecno Things. Todos los derechos reservados.</p>
+      <div class="flex items-center gap-4">
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Política de Cookies</a>
+        <span class="text-slate-600">|</span>
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Preferencias</a>
+      </div>
+      <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+        Volver arriba <span class="material-icons-round">arrow_upward</span>
+      </button>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme Manager
+  const themeManager = {
+    getTheme() {
+      return localStorage.getItem('tecno-theme') || 'light';
+    },
+    setTheme(theme) {
+      localStorage.setItem('tecno-theme', theme);
+    },
+    toggleTheme() {
+      const current = this.getTheme();
+      const newTheme = current === 'light' ? 'dark' : 'light';
+      this.setTheme(newTheme);
+      this.applyTheme(newTheme);
+    },
+    applyTheme(theme) {
+      const html = document.documentElement;
+      if (theme === 'dark') {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+      }
+    }
+  };
+
+  // Inicializar tema
+  const savedTheme = localStorage.getItem('tecno-theme') || 'light';
+  themeManager.applyTheme(savedTheme);
+</script>
+
+</body>
+</html>

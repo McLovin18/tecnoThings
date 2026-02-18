@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Categorías</title>
+</head>
+<body>
+  <h1>Test de Categorías Globales</h1>
+  <div id="output"></div>
+
+  <script type="module">
+    import { CATEGORIES_STRUCTURE } from './scripts/categories.js';
+    
+    const output = document.getElementById('output');
+    
+    output.innerHTML = `
+      <h2>Estructura de Categorías Cargada:</h2>
+      <p><strong>Total de categorías principales:</strong> ${Object.keys(CATEGORIES_STRUCTURE).length}</p>
+      <ul>
+        ${Object.entries(CATEGORIES_STRUCTURE).map(([key, cat]) => `
+          <li>
+            <strong>${cat.name}</strong> (id: ${cat.id})
+            <ul>
+              ${Object.entries(cat.subcategories).map(([subkey, subcat]) => `
+                <li>${subcat.name}</li>
+              `).join('')}
+            </ul>
+          </li>
+        `).join('')}
+      </ul>
+    `;
+  </script>
+</body>
+</html>

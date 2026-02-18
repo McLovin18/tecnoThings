@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Blog - Tecno Things | Tienda Autorizada</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#ffffff",
+            "background-light": "#f8fafc",
+            "background-dark": "#000000",
+            accent: "#3b82f6"
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "12px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-24 lg:pb-0">
+<script type="module">
+  import { ensureRoleAccess } from '../scripts/route-protection.js';
+  await ensureRoleAccess('cliente');
+</script>
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-30 px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <button id="menu-toggle" onclick="window.toggleMobileMenu ? window.toggleMobileMenu() : document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10" type="button">
+        <span class="material-icons-round">menu</span>
+      </button>
+
+      <a href="./clientDashboard.html" class="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Tienda Autorizada</span>
+        <h1 class="text-xl font-extrabold tracking-tighter leading-none dark:text-white">TECNO THINGS</h1>
+      </a>
+
+      <button id="search-button" class="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors ml-2" title="Buscar productos">
+        <span class="material-icons-round text-lg">search</span>
+      </button>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <div class="hidden lg:flex items-center gap-6">
+      <a href="./clientDashboard.html" class="text-sm font-medium hover:text-accent transition-colors">Inicio</a>
+      <a href="./blogs.html" class="text-sm font-medium hover:text-accent transition-colors text-accent">Blogs</a>
+    </div>
+
+    <!-- Auth Section -->
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <a href="./cart.html" class="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-2xl">shopping_bag</span>
+        <span id="cart-badge" class="absolute top-0 right-0 w-4 h-4 bg-accent text-white text-[10px] font-bold flex items-center justify-center rounded-full hidden">0</span>
+      </a>
+      <div id="auth-container" class="flex items-center gap-2"></div>
+    </div>
+  </div>
+</nav>
+
+<div class="hidden lg:block sticky top-16 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-3">
+  <div id="categories-bar" class="max-w-full overflow-visible"><div class="flex items-center justify-center gap-6 max-w-full overflow-visible"></div></div>
+</div>
+
+<!-- Floating Search Button (Mobile) -->
+<button id="floating-search" class="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-accent text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all active:scale-95">
+  <span class="material-icons-round text-2xl">search</span>
+</button>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="hidden lg:hidden fixed top-16 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 z-40 max-h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+  <div class="px-4 py-3 space-y-1 flex-shrink-0">
+    <a href="./clientDashboard.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Inicio</a>
+    <a href="./blogs.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium text-accent">Blogs</a>
+    <a href="./cart.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Carrito</a>
+  </div>
+  <div id="mobile-categories-container" class="px-4 py-3 space-y-1 flex-1 min-h-0 overflow-y-auto"></div>
+  <div id="auth-mobile-container" class="px-4 py-3 border-t border-slate-200 dark:border-white/10 flex-shrink-0"></div>
+</div>
+
+<!-- MAIN -->
+<main class="max-w-6xl mx-auto px-4 py-8 lg:px-6">
+  <h1 class="text-4xl font-bold mb-4">Blog de Tecno Things</h1>
+  <p class="text-slate-600 dark:text-slate-400 mb-12">Artículos, tutoriales y noticias sobre tecnología</p>
+
+  <div id="loading" class="text-center py-12">
+    <span class="material-icons-round animate-spin text-4xl">sync</span>
+    <p class="mt-4 text-slate-500">Cargando artículos...</p>
+  </div>
+
+  <div id="blogs-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+  <div id="empty-state" class="hidden text-center py-12">
+    <span class="material-icons-round text-6xl opacity-30">article</span>
+    <h3 class="text-xl font-semibold mt-4">No hay artículos disponibles</h3>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-slate-900 dark:bg-black text-white mt-20 border-t border-slate-800">
+  <div class="px-4 py-16 lg:px-6 max-w-6xl mx-auto">
+    <!-- Footer Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+      <!-- Brand & Contact Info -->
+      <div>
+        <h3 class="text-2xl font-bold mb-4">TECNO THINGS</h3>
+        <p class="text-slate-400 mb-6">Tienda autorizada / Pc Gamer / Streaming</p>
+        
+        <!-- Contact Information -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-start gap-3">
+            <span class="material-icons-round text-accent mt-1 flex-shrink-0">location_on</span>
+            <span class="text-slate-400 text-sm">Centro comercial San Felipe, Guayaquil, Ecuador 090101</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">phone</span>
+            <span class="text-slate-400 text-sm">+593 96 287 3167</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">mail</span>
+            <span class="text-slate-400 text-sm">info@techthings.com</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">schedule</span>
+            <span class="text-slate-400 text-sm">Lun-Vie: 9AM-6PM</span>
+          </div>
+        </div>
+
+        <!-- Social Links -->
+        <div class="flex gap-4">
+          <a href="https://www.instagram.com/tecnothings_ec/" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">camera_alt</span>
+          </a>
+          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">language</span>
+          </a>
+          <a href="mailto:info@techthings.com" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">mail</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Productos -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Productos</h4>
+        <ul class="space-y-3">
+          <li><a href="./products-by-category.html?category=perifericos" class="text-slate-400 hover:text-white transition-colors">Periféricos</a></li>
+          <li><a href="./products-by-category.html?category=monitores" class="text-slate-400 hover:text-white transition-colors">Monitores</a></li>
+          <li><a href="./products-by-category.html?category=hardware" class="text-slate-400 hover:text-white transition-colors">Hardware</a></li>
+          <li><a href="./products-by-category.html?category=laptops" class="text-slate-400 hover:text-white transition-colors">Laptops</a></li>
+          <li><a href="./products-by-category.html?category=ofertas" class="text-slate-400 hover:text-white transition-colors">Ofertas</a></li>
+        </ul>
+      </div>
+
+      <!-- Información -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Información</h4>
+        <ul class="space-y-3">
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Sobre nosotros</a></li>
+          <li><a href="./blogs.html" class="text-slate-400 hover:text-white transition-colors">Blog</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Política de privacidad</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Términos de servicio</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Contacto</a></li>
+        </ul>
+      </div>
+
+      <!-- Google Maps -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Ubicación</h4>
+        <div class="rounded-lg overflow-hidden border border-slate-700 h-64 w-full">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.5779746282846!2d-79.9309434!3d-2.1294174!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d733792952ed1:0x2fda88783fa806f2!2sTECNOTHINGS%20GYE!5e0!3m2!1ses!2sec!4v1707593400000"
+            allowfullscreen="" 
+            aria-hidden="false" 
+            tabindex="0">
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-slate-800 pt-8 mb-8"></div>
+
+    <!-- Footer Bottom -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <p class="text-slate-400 text-sm">© 2026 Tecno Things. Todos los derechos reservados.</p>
+      <div class="flex items-center gap-4">
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Política de Cookies</a>
+        <span class="text-slate-600">|</span>
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Preferencias</a>
+      </div>
+      <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+        Volver arriba <span class="material-icons-round">arrow_upward</span>
+      </button>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+import { getPublishedBlogs } from '../scripts/firebase-blogs.js';
+
+async function loadBlogs() {
+  try {
+    function withTimeout(p, ms) { return Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error('timeout')), ms))]); }
+    const blogs = await withTimeout(getPublishedBlogs(), 6000).catch(() => null);
+    const loading = document.getElementById('loading');
+    const grid = document.getElementById('blogs-grid');
+    const empty = document.getElementById('empty-state');
+
+    loading.classList.add('hidden');
+
+    if (!blogs || blogs.length === 0) {
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    grid.innerHTML = blogs.map(blog => `
+      <a href="./blog-detail.html?id=${blog.id}" class="bg-white dark:bg-slate-800 rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow">
+        <div class="w-full h-40 bg-slate-200 dark:bg-slate-700 overflow-hidden">
+          <img src="${blog.coverImage || 'https://via.placeholder.com/400x200'}" alt="${blog.title}" class="w-full h-full object-cover hover:scale-105 transition-transform">
+        </div>
+        <div class="p-6">
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">${new Date(blog.createdAt?.toDate?.() || blog.createdAt).toLocaleDateString('es-ES', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+          <h2 class="font-bold text-lg line-clamp-2 mb-2">${blog.title}</h2>
+          <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2">${blog.description || blog.content?.substring(0, 100)}</p>
+          <div class="mt-4 flex items-center text-accent font-medium text-sm">
+            Leer más <span class="material-icons-round text-sm ml-1">arrow_forward</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
+
+    grid.classList.remove('hidden');
+  } catch (error) {
+    const loading = document.getElementById('loading');
+    loading.classList.add('hidden');
+    document.getElementById('empty-state').classList.remove('hidden');
+  }
+}
+
+// Tema
+const themeManager = {
+  getTheme() {
+    return localStorage.getItem('tecno-theme') || 'light';
+  },
+  toggleTheme() {
+    const current = this.getTheme();
+    const newTheme = current === 'light' ? 'dark' : 'light';
+    localStorage.setItem('tecno-theme', newTheme);
+    document.documentElement.classList.toggle('dark');
+  }
+};
+
+document.getElementById('theme-toggle')?.addEventListener('click', () => themeManager.toggleTheme());
+document.getElementById('menu-toggle')?.addEventListener('click', () => {
+  document.getElementById('mobile-menu')?.classList.toggle('hidden');
+});
+
+themeManager.getTheme() === 'dark' && document.documentElement.classList.add('dark');
+loadBlogs();
+</script>
+
+<script type="module">
+  import { CATEGORIES_STRUCTURE } from '../scripts/categories.js';
+  const container = document.getElementById('categories-bar');
+  if (container && container.childElementCount === 0) {
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-center gap-2';
+    Object.values(CATEGORIES_STRUCTURE).forEach(cat => {
+      const a = document.createElement('a');
+      a.href = `./products-by-category.html?category=${cat.id}`;
+      a.className = 'px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center gap-2';
+      a.innerHTML = `<span class="material-icons-round text-sm">${cat.icon}</span><span>${cat.name}</span>`;
+      row.appendChild(a);
+    });
+    container.appendChild(row);
+  }
+</script>
+
+<script type="module">
+  import { CATEGORIES_STRUCTURE } from '../scripts/categories.js';
+  function initializeCategoriesNavbar() {
+    const categoriesContainer = document.querySelector('#categories-bar > div.flex');
+    if (!categoriesContainer) return;
+    Object.entries(CATEGORIES_STRUCTURE).forEach(([key, category]) => {
+      const categoryDiv = document.createElement('div');
+      categoryDiv.className = 'relative group';
+      const button = document.createElement('button');
+      button.className = 'flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 whitespace-nowrap transition-colors';
+      button.innerHTML = `
+        <span class=\"material-icons-round text-lg\">${category.icon}</span>
+        <span class=\"text-sm font-medium\">${category.name}</span>
+        <span class=\"material-icons-round text-sm\">expand_more</span>
+      `;
+      const dropdown = document.createElement('div');
+      dropdown.className = 'absolute left-0 top-full mt-0 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl hidden group-hover:block z-50 overflow-visible';
+      Object.entries(category.subcategories).forEach(([subkey, subcat]) => {
+        const subItemDiv = document.createElement('div');
+        subItemDiv.className = 'relative group/submenu';
+        const subLink = document.createElement('a');
+        const hasSubsub = subcat.subsubcategories && Object.keys(subcat.subsubcategories).length > 0;
+        subLink.href = `./products-by-category.html?category=${category.id}&subcategory=${subcat.id}`;
+        subLink.className = 'flex items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 text-sm transition-colors';
+        subLink.innerHTML = `
+          <span class=\"flex items-center gap-3 flex-1\">
+            <span class=\"material-icons-round text-base\">${subcat.icon || 'chevron_right'}</span>
+            <span>${subcat.name}</span>
+          </span>
+          ${hasSubsub ? '<span class=\"material-icons-round text-xs ml-auto\">chevron_right</span>' : ''}
+        `;
+        if (hasSubsub) {
+          subLink.addEventListener('click', (e) => e.preventDefault());
+          const submenu = document.createElement('div');
+          submenu.className = 'absolute left-full top-0 mt-0 ml-1 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl hidden group-hover/submenu:block z-50 overflow-hidden';
+          Object.entries(subcat.subsubcategories).forEach(([ssk, subsubcat]) => {
+            const subsubLink = document.createElement('a');
+            subsubLink.href = `./products-by-category.html?category=${category.id}&subcategory=${subcat.id}&subsubcategory=${subsubcat.id}`;
+            subsubLink.className = 'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 text-sm transition-colors';
+            subsubLink.textContent = subsubcat.name;
+            submenu.appendChild(subsubLink);
+          });
+          subItemDiv.appendChild(submenu);
+        }
+        subItemDiv.appendChild(subLink);
+        dropdown.appendChild(subItemDiv);
+      });
+      categoryDiv.appendChild(button);
+      categoryDiv.appendChild(dropdown);
+      categoriesContainer.appendChild(categoryDiv);
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCategoriesNavbar);
+  } else {
+    initializeCategoriesNavbar();
+  }
+</script>
+
+<!-- SCRIPT MODULE: Menú móvil de categorías -->
+<script type="module">
+  import { CATEGORIES_STRUCTURE } from '../scripts/categories.js';
+  function initializeMobileMenu() {
+    const container = document.getElementById('mobile-categories-container');
+    if (!container) return;
+    Object.entries(CATEGORIES_STRUCTURE).forEach(([key, category]) => {
+      const categoryDiv = document.createElement('div');
+      const button = document.createElement('button');
+      button.className = 'w-full flex items-center justify-between px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium';
+      button.type = 'button';
+      button.onclick = function() { window.toggleMobileCategory(this); };
+      button.innerHTML = `
+        <span class=\"flex items-center gap-2\">
+          <span class=\"material-icons-round text-base\">${category.icon}</span>
+          <span>${category.name}</span>
+        </span>
+        <span class=\"material-icons-round text-base\">expand_more</span>
+      `;
+      categoryDiv.appendChild(button);
+      const subItemsDiv = document.createElement('div');
+      subItemsDiv.className = 'hidden ml-4 space-y-1 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2 my-1';
+      Object.entries(CATEGORIES_STRUCTURE[key].subcategories).forEach(([subkey, subcat]) => {
+        const subLink = document.createElement('a');
+        subLink.href = `./products-by-category.html?category=${category.id}&subcategory=${subcat.id}`;
+        subLink.className = 'block px-3 py-2 rounded text-xs hover:bg-slate-200 dark:hover:bg-slate-700';
+        subLink.textContent = subcat.name;
+        subItemsDiv.appendChild(subLink);
+      });
+      categoryDiv.appendChild(subItemsDiv);
+      container.appendChild(categoryDiv);
+    });
+  }
+  window.toggleMobileCategory = function(btn) {
+    const panel = btn.nextElementSibling;
+    if (panel) panel.classList.toggle('hidden');
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeMobileMenu);
+  } else {
+    initializeMobileMenu();
+  }
+</script>
+
+<!-- SCRIPT MODULE: UI de autenticación (desktop y móvil) -->
+<script type="module">
+  import { getCurrentUser, logoutUser } from '../scripts/firebase-auth.js';
+  async function updateAuthUI() {
+    const user = await getCurrentUser();
+    const container = document.getElementById('auth-container');
+    const mobileContainer = document.getElementById('auth-mobile-container');
+    if (!container) return;
+    if (user) {
+      container.innerHTML = `
+        <div class="relative group">
+          <button class="flex items-center space-x-1 p-1 pl-2 rounded-full border border-slate-200 dark:border-neutral-800 hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">${user.avatar || 'U'}</div>
+            <span class="text-sm font-medium hidden xl:inline">${user.name || user.displayName || 'Usuario'}</span>
+            <span class="material-icons-round text-lg">keyboard_arrow_down</span>
+          </button>
+          <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl shadow-xl hidden group-hover:block overflow-hidden z-[9999]">
+            <div class="px-4 py-3 border-b border-slate-100 dark:border-neutral-800">
+              <p class="text-sm font-medium">${user.name || 'Usuario'}</p>
+              <p class="text-xs text-slate-500 dark:text-neutral-400">${user.email || ''}</p>
+            </div>
+            <a class="flex items-center px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800 border-b border-slate-100 dark:border-neutral-800" href="./clientDashboard.html#account">
+              <span class="material-icons-round text-lg mr-2">person</span> Mi Cuenta
+            </a>
+            <a class="flex items-center px-4 py-3 text-sm hover:bg-slate-50 dark:hoverbg-neutral-800 border-b border-slate-100 dark:border-neutral-800" href="./clientDashboard.html#purchases">
+              <span class="material-icons-round text-lg mr-2">shopping_bag</span> Mis Pedidos
+            </a>
+            <button id="logout-btn" class="w-full text-left flex items-center px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20">
+              <span class="material-icons-round text-lg mr-2">logout</span> Cerrar Sesión
+            </button>
+          </div>
+        </div>`;
+      document.getElementById('logout-btn')?.addEventListener('click', async () => {
+        await logoutUser();
+        window.location.href = '../login_and_registration/login.html';
+      });
+      if (mobileContainer) {
+        mobileContainer.innerHTML = `
+          <div class="space-y-1">
+            <a href="./clientDashboard.html#account" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium flex items-center gap-2">
+              <span class="material-icons-round text-xl">person</span>
+              Mi Cuenta
+            </a>
+            <a href="./clientDashboard.html#purchases" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium flex items-center gap-2">
+              <span class="material-icons-round text-xl">shopping_bag</span>
+              Mis Pedidos
+            </a>
+            <button id="logout-btn-mobile" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-medium flex items-center gap-2 text-red-600 dark:text-red-400">
+              <span class="material-icons-round text-xl">logout</span>
+              Cerrar Sesión
+            </button>
+          </div>`;
+        document.getElementById('logout-btn-mobile')?.addEventListener('click', async () => {
+          await logoutUser();
+          window.location.href = '../login_and_registration/login.html';
+        });
+      }
+    } else {
+      container.innerHTML = `
+        <a href="../login_and_registration/login.html" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+          <span class="material-icons-round text-2xl">account_circle</span>
+        </a>`;
+      if (mobileContainer) {
+        mobileContainer.innerHTML = `
+          <a href="../login_and_registration/login.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium flex items-center gap-2">
+            <span class="material-icons-round text-xl">account_circle</span>
+            Iniciar Sesión
+          </a>`;
+      }
+    }
+  }
+  updateAuthUI();
+</script>
+
+<script type="module">
+  import { renderCategoriesBarHorizontal, renderCategoriesMenuMobile, initializeCategoriesMenu } from '../scripts/categories-menu.js';
+  const barEl = document.querySelector('#categories-bar > div');
+  if (barEl && barEl.childElementCount === 0) {
+    barEl.innerHTML = renderCategoriesBarHorizontal('./');
+  }
+  const mobileCategoriesEl = document.getElementById('mobile-categories-container');
+  if (mobileCategoriesEl && mobileCategoriesEl.childElementCount === 0) {
+    mobileCategoriesEl.innerHTML = renderCategoriesMenuMobile();
+  }
+  initializeCategoriesMenu();
+</script>
+
+<script type="module">
+  import { renderCategoriesMenuMobile, initializeCategoriesMenu } from '../scripts/categories-menu.js';
+  document.addEventListener('DOMContentLoaded', () => {
+    const mobileEl = document.getElementById('mobile-categories-container');
+    if (mobileEl && mobileEl.childElementCount === 0) {
+      mobileEl.innerHTML = renderCategoriesMenuMobile();
+      initializeCategoriesMenu();
+    }
+  });
+</script>
+
+<script>
+  window.toggleMobileMenu = function() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu) mobileMenu.classList.toggle('hidden');
+  };
+</script>
+
+</body>
+</html>

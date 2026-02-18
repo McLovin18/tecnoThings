@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Clientes - Admin - Tecno Things</title>
+  
+  <script>
+    (function() {
+      const demoKeys = ['tecnoThingsUser', 'tecnoThingsUsers'];
+      demoKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          console.warn(`🧹 Eliminando dato demo: ${key}`);
+          localStorage.removeItem(key);
+        }
+      });
+      console.log('✅ Sistema de seguridad: Firebase Only');
+    })();
+  </script>
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#3b82f6",
+            "background-light": "#f8fafc",
+            "background-dark": "#09090b",
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24 lg:pb-0">
+<script type="module">
+  import { protectRoute } from '../scripts/route-protection.js';
+  await protectRoute('admin');
+</script>
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-30 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 px-4 py-3 lg:px-6 lg:py-4 overflow-visible">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <button id="menu-toggle" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800" type="button">
+        <span class="material-icons-round">menu</span>
+      </button>
+    </div>
+
+    <div class="hidden lg:flex items-center gap-6">
+      <a href="./dashboard.html" class="text-sm font-medium hover:text-primary transition-colors">Dashboard</a>
+      <a href="./blogs.html" class="text-sm font-medium hover:text-primary transition-colors">Blogs</a>
+      <span class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-bold rounded-full">ADMIN</span>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <button class="p-2 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700">
+        <span class="material-icons-round text-xl">notifications</span>
+      </button>
+      <div id="auth-container" class="overflow-visible">
+        <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold ring-2 ring-white dark:ring-zinc-800">
+          JA
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- CATEGORIES BAR (desktop) -->
+<div class="hidden lg:block sticky top-16 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 px-6 py-3">
+  <div id="categories-bar" class="max-w-full overflow-visible"><div class="flex items-center justify-center gap-6 max-w-full overflow-visible"></div></div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="hidden lg:hidden fixed top-16 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 z-40 max-h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+  <div class="px-4 py-2 space-y-1 flex-shrink-0">
+    <a href="./dashboard.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Inicio</a>
+    <a href="./blogs.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Blogs</a>
+    <a href="./products.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Categorías</a>
+    <a href="./settings.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Mi Cuenta</a>
+  </div>
+  <div id="mobile-categories-container" class="px-4 py-3 space-y-1 flex-1 min-h-0 overflow-y-auto"></div>
+</div>
+
+<!-- DESKTOP SIDEBAR -->
+<div class="hidden md:flex fixed left-0 top-16 bottom-0 w-48 z-50 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex-col items-center pt-6 px-4 gap-4">
+  <a href="../tecno_things_landing_page/index.html" class="flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-opacity mb-4 w-full">
+    <span class="text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center leading-tight">Tienda Autorizada</span>
+    <h1 class="text-base font-extrabold tracking-tighter leading-tight dark:text-white text-center">TECNO THINGS</h1>
+  </a>
+  
+  <a href="./dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors w-full">
+    <span class="material-icons-round text-xl">grid_view</span>
+    <span class="text-sm font-medium">Dashboard</span>
+  </a>
+  <a href="./products.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors w-full">
+    <span class="material-icons-round text-xl">inventory_2</span>
+    <span class="text-sm font-medium">Productos</span>
+  </a>
+  <a href="./orders.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors w-full">
+    <span class="material-icons-round text-xl">shopping_cart</span>
+    <span class="text-sm font-medium">Pedidos</span>
+  </a>
+  <a href="./customers.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary transition-colors w-full">
+    <span class="material-icons-round text-xl">groups</span>
+    <span class="text-sm font-medium">Clientes</span>
+  </a>
+  <button onclick="window.open('./landing-editor.html', 'landing-editor', 'width=1200,height=800,resizable=yes,scrollbars=yes')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors w-full">
+    <span class="material-icons-round text-xl">edit</span>
+    <span class="text-sm font-medium">Landing</span>
+  </button>
+  <button onclick="window.open('../blog-manager.html', 'blog-manager', 'width=1200,height=800,resizable=yes,scrollbars=yes')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors w-full">
+    <span class="material-icons-round text-xl">article</span>
+    <span class="text-sm font-medium">Editar Blogs</span>
+  </button>
+  <a href="./settings.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors mt-auto mb-6 w-full">
+    <span class="material-icons-round text-xl">settings</span>
+    <span class="text-sm font-medium">Ajustes</span>
+  </a>
+</div>
+
+<!-- MOBILE BOTTOM BAR -->
+<div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-zinc-800 z-40 overflow-x-auto overflow-y-hidden hide-scrollbar" style="-webkit-overflow-scrolling: touch;">
+  <div class="flex items-center justify-start gap-0 min-w-max h-24 px-2">
+  <a href="./dashboard.html" class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white transition-colors flex-shrink-0 w-20 min-w-[80px] py-2">
+    <span class="material-icons-round text-xl">grid_view</span>
+    <span class="text-[9px] font-medium text-center leading-tight">Dashboard</span>
+  </a>
+  <a href="./products.html" class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white transition-colors flex-shrink-0 w-20 min-w-[80px] py-2">
+    <span class="material-icons-round text-xl">inventory_2</span>
+    <span class="text-[9px] font-medium text-center leading-tight">Productos</span>
+  </a>
+  <a href="./orders.html" class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white transition-colors flex-shrink-0 w-20 min-w-[80px] py-2">
+    <span class="material-icons-round text-xl">shopping_cart</span>
+    <span class="text-[9px] font-medium text-center leading-tight">Pedidos</span>
+  </a>
+  <a href="./customers.html" class="flex flex-col items-center justify-center gap-1 text-primary flex-shrink-0 w-20 min-w-[80px] py-2">
+    <span class="material-icons-round text-xl">groups</span>
+    <span class="text-[9px] font-medium text-center leading-tight">Clientes</span>
+  </a>
+  
+  <button onclick="window.open('./landing-editor.html', 'landing-editor', 'width=1200,height=800,resizable=yes,scrollbars=yes')" class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white transition-colors flex-shrink-0 w-20 min-w-[80px] py-2">
+    <span class="material-icons-round text-xl">edit</span>
+    <span class="text-[9px] font-medium text-center leading-tight">Landing</span>
+  </button>
+  <button onclick="window.open('../blog-manager.html', 'blog-manager', 'width=1200,height=800,resizable=yes,scrollbars=yes')" class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white transition-colors flex-shrink-0 w-20 min-w-[80px] py-2">
+    <span class="material-icons-round text-xl">article</span>
+    <span class="text-[9px] font-medium text-center leading-tight">Blogs</span>
+  </button>
+  
+  <a href="./settings.html" class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white transition-colors flex-shrink-0 w-20 min-w-[80px] py-2">
+    <span class="material-icons-round text-xl">settings</span>
+    <span class="text-[9px] font-medium text-center leading-tight">Ajustes</span>
+  </a>
+</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="md:ml-48 px-4 pt-6 md:pt-6 space-y-6 pb-24 md:pb-6">
+  <div class="max-w-full">
+    <div>
+      <h1 class="text-3xl font-bold">Gestión de Clientes</h1>
+      <p class="text-slate-500 dark:text-zinc-400 text-sm">Administra la información de tus clientes</p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+      <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+        <input type="text" placeholder="Buscar clientes..." class="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500">
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+            <tr>
+              <th class="text-left px-4 lg:px-6 py-4 font-semibold">Nombre</th>
+              <th class="text-left px-4 lg:px-6 py-4 font-semibold">Email</th>
+              <th class="text-left px-4 lg:px-6 py-4 font-semibold hidden md:table-cell">Teléfono</th>
+              <th class="text-left px-4 lg:px-6 py-4 font-semibold hidden lg:table-cell">Pedidos</th>
+              <th class="text-left px-4 lg:px-6 py-4 font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Los clientes se cargan aquí desde Firebase -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+</main>
+
+<script src="../scripts/firebase-config.js"></script>
+<script src="../scripts/firebase-auth.js"></script>
+<script src="../scripts/firebase-security.js"></script>
+<script>
+  let logoutUser, requireRole, initSecurityValidation;
+  let customersManager, ordersManager;
+
+  // Importar módulos con dynamic import
+  (async () => {
+    try {
+      const fbAuth = await import('../scripts/firebase-auth.js');
+      const fbSecurity = await import('../scripts/firebase-security.js');
+      const fbFirestore = await import('../scripts/admin-firestore.js');
+      
+      logoutUser = fbAuth.logoutUser;
+      requireRole = fbSecurity.requireRole;
+      initSecurityValidation = fbSecurity.initSecurityValidation;
+      customersManager = fbFirestore.customersManager;
+      ordersManager = fbFirestore.ordersManager;
+
+      window.logoutUser = logoutUser;
+      window.requireRole = requireRole;
+      window.initSecurityValidation = initSecurityValidation;
+
+      initSecurityValidation();
+      const user = await requireRole('admin', '../tecno_things_landing_page/index.html');
+      
+      if (!user) {
+        console.error('❌ No se pudo validar rol de admin');
+        return;
+      }
+      
+      console.log('✅ Admin autenticado:', user.email);
+      updateAuthUI(user);
+      
+      // Cargar clientes reales
+      await loadCustomers();
+      
+      // Escuchar cambios en clientes
+      customersManager.onCustomersChange(() => loadCustomers());
+    } catch (error) {
+      console.error('❌ Error al cargar módulos:', error);
+    }
+  })();
+
+  async function loadCustomers() {
+    const customers = await customersManager.getAll();
+    const orders = await ordersManager.getAll();
+    const tbody = document.querySelector('tbody');
+    
+    if (!customers || customers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500">No hay clientes registrados aún.</td></tr>';
+      return;
+    }
+
+    // Contar órdenes por cliente
+    const orderCountByCustomer = {};
+    orders.forEach(order => {
+      orderCountByCustomer[order.customerId] = (orderCountByCustomer[order.customerId] || 0) + 1;
+    });
+
+    tbody.innerHTML = customers.map(customer => {
+      const orderCount = orderCountByCustomer[customer.id] || 0;
+      const orderBadgeColor = orderCount > 10 ? 'green' : orderCount > 5 ? 'blue' : orderCount > 0 ? 'orange' : 'slate';
+      const colorClasses = {
+        green: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+        blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+        orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
+        slate: 'bg-slate-100 dark:bg-slate-900/30 text-slate-700 dark:text-slate-400'
+      };
+
+      return `
+        <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900">
+          <td class="px-4 lg:px-6 py-4 font-medium">${customer.name || 'Desconocido'}</td>
+          <td class="px-4 lg:px-6 py-4">${customer.email}</td>
+          <td class="px-4 lg:px-6 py-4 hidden md:table-cell">${customer.phone || '-'}</td>
+          <td class="px-4 lg:px-6 py-4 hidden lg:table-cell">
+            <span class="${colorClasses[orderBadgeColor]} px-2 py-1 rounded text-xs font-medium">${orderCount}</span>
+          </td>
+          <td class="px-4 lg:px-6 py-4 flex gap-2">
+            <button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg" title="Ver" onclick="window.viewCustomer('${customer.id}')">
+              <span class="material-icons-round text-sm">visibility</span>
+            </button>
+            <button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg" title="Editar" onclick="window.editCustomer('${customer.id}')">
+              <span class="material-icons-round text-sm">edit</span>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  window.viewCustomer = (customerId) => {
+    console.log('Ver cliente:', customerId);
+    alert('Funcionalidad en desarrollo.');
+  };
+
+  window.editCustomer = (customerId) => {
+    console.log('Editar cliente:', customerId);
+    alert('Funcionalidad en desarrollo.');
+  };
+
+  function updateAuthUI(user) {
+    const authContainer = document.getElementById('auth-container');
+    if (!authContainer) return;
+
+    authContainer.innerHTML = `
+      <div class="relative group overflow-visible">
+        <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold ring-2 ring-white dark:ring-zinc-800 cursor-pointer hover:ring-4 hover:ring-primary/50 transition-all">
+          ${user.avatar}
+        </div>
+        <div class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl hidden group-hover:block overflow-visible z-[9999]">
+          <div class="px-4 py-3 border-b border-slate-100 dark:border-zinc-800">
+            <p class="text-sm font-medium">${user.name}</p>
+            <p class="text-xs text-slate-500 dark:text-zinc-400">${user.email}</p>
+            <span class="inline-block mt-2 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-bold rounded">ADMINISTRADOR</span>
+          </div>
+          <a class="flex items-center px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-100 dark:border-zinc-800" href="#">
+            <span class="material-icons-round text-lg mr-2">person</span> Mi Perfil
+          </a>
+          <a class="flex items-center px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-100 dark:border-zinc-800" href="#">
+            <span class="material-icons-round text-lg mr-2">settings</span> Configuración
+          </a>
+          <button onclick="window.logout()" class="w-full text-left flex items-center px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20">
+            <span class="material-icons-round text-lg mr-2">logout</span> Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  window.logout = async () => {
+    try {
+      await logoutUser();
+      console.log('✅ Sesión cerrada exitosamente');
+      window.location.href = '../login_and_registration/login.html';
+    } catch (error) {
+      console.error('❌ Error al cerrar sesión:', error);
+      alert('Error al cerrar sesión. Por favor intenta de nuevo.');
+    }
+  };
+
+  document.getElementById('theme-toggle').addEventListener('click', function() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  });
+
+  if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  }
+</script>
+
+<!-- SCRIPT: Barra de categorías (desktop) horizontal con dropdowns -->
+<script type="module">
+  import { renderCategoriesBarHorizontal } from '../scripts/categories-menu.js';
+  const container = document.querySelector('#categories-bar > div.flex');
+  if (container && container.childElementCount === 0) {
+    container.innerHTML = renderCategoriesBarHorizontal('./');
+  }
+</script>
+
+<!-- SCRIPT: Menú de categorías (móvil) -->
+<script type="module">
+  import { renderCategoriesMenuMobile, initializeCategoriesMenu } from '../scripts/categories-menu.js';
+  const mobileCategoriesEl = document.getElementById('mobile-categories-container');
+  if (mobileCategoriesEl && mobileCategoriesEl.childElementCount === 0) {
+    mobileCategoriesEl.innerHTML = renderCategoriesMenuMobile();
+  }
+  initializeCategoriesMenu();
+</script>
+</body>
+</html>

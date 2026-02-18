@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Blog - Tecno Things | Admin</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#ffffff",
+            "background-light": "#f8fafc",
+            "background-dark": "#000000",
+            accent: "#3b82f6"
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "12px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-24 lg:pb-0">
+
+<!-- Script para verificar autenticación -->
+<script type="module">
+  import { getCurrentUser } from '../scripts/firebase-auth.js';
+  import { requireRole, initSecurityValidation } from '../scripts/firebase-security.js';
+  
+  // Verificar si el usuario es admin
+  (async () => {
+    initSecurityValidation();
+    const currentUser = await requireRole('admin', '../tecno_things_landing_page/blogs.html');
+    if (!currentUser) {
+      return;
+    }
+    console.log('✅ Admin validado para blogs');
+  })();
+</script>
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-30 px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <!-- Hamburger menu (mobile) -->
+      <button id="menu-toggle" onclick="window.toggleMobileMenu ? window.toggleMobileMenu() : document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10" type="button">
+        <span class="material-icons-round">menu</span>
+      </button>
+
+      <!-- Logo -->
+      <a href="./dashboard.html" class="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Admin Panel</span>
+        <h1 class="text-xl font-extrabold tracking-tighter leading-none dark:text-white">TECNO THINGS</h1>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <div class="hidden lg:flex items-center gap-6">
+      <a href="./dashboard.html" class="text-sm font-medium hover:text-accent transition-colors">Dashboard</a>
+      <a href="./blogs.html" class="text-sm font-medium hover:text-accent transition-colors text-accent">Blogs</a>
+    </div>
+
+    <!-- Auth Section -->
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <div id="auth-container"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- CATEGORIES BAR (desktop) -->
+<div class="hidden lg:block sticky top-16 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-3">
+  <div id="categories-bar" class="max-w-full overflow-visible"><div class="flex items-center justify-center gap-6 max-w-full overflow-visible"></div></div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="hidden lg:hidden fixed top-16 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 z-40 max-h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+  <div class="px-4 py-2 space-y-1 flex-shrink-0">
+    <a href="./dashboard.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Inicio</a>
+    <a href="./blogs.html" class="block px-4 py-3 rounded-lg bg-accent/10 text-accent transition-colors text-sm font-medium">Blogs</a>
+    <a href="./products.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Categorías</a>
+    <a href="./settings.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Mi Cuenta</a>
+  </div>
+  <div id="mobile-categories-container" class="px-4 py-3 space-y-1 flex-1 min-h-0 overflow-y-auto"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 py-12 lg:px-6">
+  <!-- Page Header -->
+  <section class="mb-16">
+    <h1 class="text-5xl font-bold tracking-tight mb-4">Blog de Tecnología</h1>
+    <p class="text-xl text-slate-600 dark:text-slate-400">Descubre los últimos artículos sobre tendencias tecnológicas, recomendaciones de productos y guías de expertos.</p>
+  </section>
+
+  <!-- Blog Posts Grid -->
+  <div id="blogs-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+    <!-- Blogs cargados dinámicamente desde localStorage -->
+  </div>
+
+  <!-- Featured Post -->
+  <section id="featured-post-section" class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-900 dark:to-blue-950 rounded-2xl overflow-hidden shadow-2xl mb-16">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+      <div class="flex flex-col justify-center text-white">
+        <div class="mb-4">
+          <span class="text-xs font-bold bg-white/20 px-3 py-1 rounded-full inline-block">Artículo Destacado</span>
+        </div>
+        <h2 id="featured-title" class="text-4xl font-bold mb-4">Cargando blog destacado...</h2>
+        <p id="featured-description" class="text-lg text-white/90 mb-6"></p>
+        <a id="featured-link" href="javascript:void(0)" class="inline-flex items-center gap-2 bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-slate-100 transition-colors w-fit">
+          Leer artículo completo
+          <span class="material-icons-round">arrow_forward</span>
+        </a>
+      </div>
+      <div class="flex items-center justify-center">
+        <span class="material-icons-round text-9xl text-white/20">trending_up</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800">
+    <h2 class="text-3xl font-bold mb-4">Suscríbete a Nuestro Newsletter</h2>
+    <p class="text-slate-600 dark:text-slate-400 mb-6">Recibe los últimos artículos, recomendaciones de productos y ofertas exclusivas directamente en tu correo.</p>
+    <form class="flex flex-col lg:flex-row gap-4">
+      <input 
+        type="email" 
+        placeholder="tu@correo.com" 
+        class="flex-1 px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-accent"
+      />
+      <button 
+        type="submit"
+        class="bg-accent hover:bg-blue-600 text-white font-bold px-8 py-3 rounded-lg transition-colors"
+      >
+        Suscribirse
+      </button>
+    </form>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-slate-900 dark:bg-black text-white mt-20 border-t border-slate-800">
+  <div class="px-4 py-16 lg:px-6 max-w-6xl mx-auto">
+    <!-- Footer Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+      <!-- Brand & Contact Info -->
+      <div>
+        <h3 class="text-2xl font-bold mb-4">TECNO THINGS</h3>
+        <p class="text-slate-400 mb-6">Tienda autorizada / Pc Gamer / Streaming</p>
+        
+        <!-- Contact Information -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-start gap-3">
+            <span class="material-icons-round text-accent mt-1 flex-shrink-0">location_on</span>
+            <span class="text-slate-400 text-sm">Matriz Tecnothings Centro comercial San Felipe, Guayaquil, Ecuador 090101</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">phone</span>
+            <span class="text-slate-400 text-sm">+593 96 287 3167</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">mail</span>
+            <span class="text-slate-400 text-sm">info@techthings.com</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-icons-round text-accent flex-shrink-0">schedule</span>
+            <span class="text-slate-400 text-sm">Lun-Vie: 9AM-6PM</span>
+          </div>
+        </div>
+
+        <!-- Social Links -->
+        <div class="flex gap-4">
+          <a href="https://www.instagram.com/tecnothings_ec/" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">camera_alt</span>
+          </a>
+          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">language</span>
+          </a>
+          <a href="mailto:info@techthings.com" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-accent flex items-center justify-center transition-colors">
+            <span class="material-icons-round text-lg">mail</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Admin Links -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Admin</h4>
+        <ul class="space-y-3">
+          <li><a href="./dashboard.html" class="text-slate-400 hover:text-white transition-colors">Dashboard</a></li>
+          <li><a href="./blogs.html" class="text-slate-400 hover:text-white transition-colors">Blog Manager</a></li>
+          <li><a href="./inventory-module.html" class="text-slate-400 hover:text-white transition-colors">Inventory</a></li>
+          <li><a href="./landing-editor.html" class="text-slate-400 hover:text-white transition-colors">Landing Editor</a></li>
+        </ul>
+      </div>
+
+      <!-- Información -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Información</h4>
+        <ul class="space-y-3">
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Sobre nosotros</a></li>
+          <li><a href="./blogs.html" class="text-slate-400 hover:text-white transition-colors">Blog</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Política de privacidad</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Términos de servicio</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-white transition-colors">Contacto</a></li>
+        </ul>
+      </div>
+
+      <!-- Google Maps -->
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Ubicación</h4>
+        <div class="rounded-lg overflow-hidden border border-slate-700 h-64 w-full">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.5779746282846!2d-79.9309434!3d-2.1294174!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d733792952ed1:0x2fda88783fa806f2!2sTECNOTHINGS%20GYE!5e0!3m2!1ses!2sec!4v1707593400000" 
+            allowfullscreen="" 
+            aria-hidden="false" 
+            tabindex="0">
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-slate-800 pt-8 mb-8"></div>
+
+    <!-- Footer Bottom -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <p class="text-slate-400 text-sm">© 2026 Tecno Things. Todos los derechos reservados.</p>
+      <div class="flex items-center gap-4">
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Política de Cookies</a>
+        <span class="text-slate-600">|</span>
+        <a href="#" class="text-slate-400 hover:text-white text-sm transition-colors">Preferencias</a>
+      </div>
+      <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+        Volver arriba <span class="material-icons-round">arrow_upward</span>
+      </button>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPT: Barra de categorías (desktop) horizontal con dropdowns -->
+<script type="module">
+  import { renderCategoriesBarHorizontal } from '../scripts/categories-menu.js';
+  const container = document.querySelector('#categories-bar > div.flex');
+  if (container && container.childElementCount === 0) {
+    container.innerHTML = renderCategoriesBarHorizontal('./');
+  }
+</script>
+
+<script type="module">
+  import { renderCategoriesMenuMobile, initializeCategoriesMenu } from '../scripts/categories-menu.js';
+  const mobileCategoriesEl = document.getElementById('mobile-categories-container');
+  if (mobileCategoriesEl && mobileCategoriesEl.childElementCount === 0) {
+    mobileCategoriesEl.innerHTML = renderCategoriesMenuMobile();
+  }
+  initializeCategoriesMenu();
+</script>
+
+<script type="module">
+  import { getCurrentUser, logoutUser } from '../scripts/firebase-auth.js';
+  import { themeManager } from '../theme.js';
+
+  // Color mapping para categorías
+  const categoryColorMap = {
+    'TECNOLOGÍA': { from: 'from-blue-500', to: 'to-blue-600', icon: 'devices', textColor: 'text-blue-700 dark:text-blue-300', bgColor: 'bg-blue-100 dark:bg-blue-900' },
+    'LAPTOPS': { from: 'from-purple-500', to: 'to-purple-600', icon: 'laptop', textColor: 'text-purple-700 dark:text-purple-300', bgColor: 'bg-purple-100 dark:bg-purple-900' },
+    'HARDWARE': { from: 'from-green-500', to: 'to-green-600', icon: 'memory', textColor: 'text-green-700 dark:text-green-300', bgColor: 'bg-green-100 dark:bg-green-900' },
+    'ALMACENAMIENTO': { from: 'from-orange-500', to: 'to-orange-600', icon: 'storage', textColor: 'text-orange-700 dark:text-orange-300', bgColor: 'bg-orange-100 dark:bg-orange-900' },
+    'PERIFÉRICOS': { from: 'from-red-500', to: 'to-red-600', icon: 'speed', textColor: 'text-red-700 dark:text-red-300', bgColor: 'bg-red-100 dark:bg-red-900' },
+    'MONITORES': { from: 'from-cyan-500', to: 'to-cyan-600', icon: 'monitor', textColor: 'text-cyan-700 dark:text-cyan-300', bgColor: 'bg-cyan-100 dark:bg-cyan-900' },
+    'ACCESORIOS': { from: 'from-pink-500', to: 'to-pink-600', icon: 'headphones', textColor: 'text-pink-700 dark:text-pink-300', bgColor: 'bg-pink-100 dark:bg-pink-900' },
+    'REDES': { from: 'from-indigo-500', to: 'to-indigo-600', icon: 'router', textColor: 'text-indigo-700 dark:text-indigo-300', bgColor: 'bg-indigo-100 dark:bg-indigo-900' }
+  };
+
+  // Cargar y renderizar blogs desde localStorage
+  function loadAndRenderBlogs() {
+    const container = document.getElementById('blogs-grid');
+    const blogsData = localStorage.getItem('tecno_blogs');
+    
+    let blogs = [];
+    if (blogsData) {
+      try {
+        blogs = JSON.parse(blogsData);
+      } catch (e) {
+        console.error('Error parsing blogs:', e);
+        blogs = [];
+      }
+    }
+
+    if (blogs.length === 0) {
+      container.innerHTML = '<p class="col-span-full text-center text-slate-500 dark:text-slate-400 py-12">No hay blogs disponibles en este momento.</p>';
+      return;
+    }
+
+    // Renderizar primeros 3 blogs
+    container.innerHTML = blogs.slice(0, 3).map(blog => {
+      const colors = categoryColorMap[blog.category] || categoryColorMap['TECNOLOGÍA'];
+      const shortDescription = blog.description.substring(0, 100) + (blog.description.length > 100 ? '...' : '');
+      
+      return `
+        <article class="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow cursor-pointer" onclick="window.location.href='../blog-detail.html?id=${blog.id}'">
+          <div class="h-48 bg-gradient-to-br ${colors.from} ${colors.to} flex items-center justify-center">
+            <span class="material-icons-round text-7xl text-white opacity-80">${colors.icon}</span>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-bold ${colors.textColor} ${colors.bgColor} px-3 py-1 rounded-full">${blog.category}</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">${blog.date}</span>
+            </div>
+            <h2 class="text-xl font-bold mb-3">${blog.title}</h2>
+            <p class="text-slate-600 dark:text-slate-400 mb-4">${shortDescription}</p>
+            <a href="javascript:void(0)" class="inline-flex items-center gap-2 text-accent font-semibold hover:gap-3 transition-all" onclick="event.stopPropagation(); window.location.href='../blog-detail.html?id=${blog.id}'">
+              Leer más
+              <span class="material-icons-round text-lg">arrow_forward</span>
+            </a>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    // Renderizar featured post (primer blog si hay)
+    if (blogs.length > 0) {
+      const featuredBlog = blogs[0];
+      document.getElementById('featured-title').textContent = featuredBlog.title;
+      document.getElementById('featured-description').textContent = featuredBlog.description;
+      document.getElementById('featured-link').href = `../blog-detail.html?id=${featuredBlog.id}`;
+    }
+  }
+
+  // Actualizar auth UI
+  async function updateAuthUI() {
+    const user = await getCurrentUser();
+    const container = document.getElementById('auth-container');
+    
+    if (user) {
+      container.innerHTML = `
+        <div class="relative group">
+          <button class="flex items-center space-x-1 p-1 pl-2 rounded-full border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
+            <span class="material-icons-round text-xl">account_circle</span>
+            <span class="material-icons-round text-lg hidden md:inline">keyboard_arrow_down</span>
+          </button>
+          <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl hidden group-hover:block z-[9999] overflow-visible">
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-white/10">
+              <p class="text-sm font-medium">${user.name}</p>
+              <p class="text-xs text-slate-500">${user.email}</p>
+            </div>
+            <a href="./dashboard.html" class="flex items-center px-4 py-3 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 border-b">
+              <span class="material-icons-round mr-2 text-lg">dashboard</span> Admin Panel
+            </a>
+            <button onclick="window.logout()" class="w-full text-left flex items-center px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20">
+              <span class="material-icons-round mr-2 text-lg">logout</span> Cerrar Sesión
+            </button>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  window.logout = () => {
+    logoutUser();
+    location.reload();
+  };
+
+  function updateThemeIcon() {
+    const icon = document.querySelector('#theme-toggle span');
+    if (icon) {
+      icon.textContent = themeManager.getTheme() === 'dark' ? 'dark_mode' : 'light_mode';
+    }
+  }
+
+  // Inicializar tema
+  const savedTheme = localStorage.getItem('tecno-theme') || 'light';
+  themeManager.applyTheme(savedTheme);
+  updateThemeIcon();
+
+  // Event Listeners
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      themeManager.toggleTheme();
+      updateThemeIcon();
+    });
+  }
+
+  const menuToggle = document.getElementById('menu-toggle');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (mobileMenu) {
+        mobileMenu.classList.toggle('hidden');
+      }
+    });
+  }
+
+  // Toggle para expandir/contraer categorías en móvil
+  window.toggleMobileCategory = (button) => {
+    const categoryDiv = button.parentElement;
+    const itemsDiv = categoryDiv.querySelector('div[class*="ml-4"]');
+    if (itemsDiv) {
+      itemsDiv.classList.toggle('hidden');
+      const icon = button.querySelector('.material-icons-round:last-child');
+      if (icon) {
+        icon.textContent = itemsDiv.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+      }
+    }
+  };
+
+  // Cargar blogs al cargar la página
+  document.addEventListener('DOMContentLoaded', loadAndRenderBlogs);
+
+  // Escuchar cambios en localStorage desde otras pestañas
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'tecno_blogs') {
+      loadAndRenderBlogs();
+    }
+  });
+
+  // Inicializar
+  (async () => {
+    await updateAuthUI();
+    loadAndRenderBlogs();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Editor de Secciones - Admin | Tecno Things</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            accent: "#3b82f6"
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white">
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-40 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <a href="../admin_dashboard/dashboard.html" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+        <span class="material-icons-round">arrow_back</span>
+      </a>
+      <h1 class="text-2xl font-bold">Editor de Secciones</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="save-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
+        <span class="material-icons-round">save</span> Guardar
+      </button>
+      <button id="reset-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+        <span class="material-icons-round">refresh</span> Resetear
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="p-6 max-w-7xl mx-auto">
+  <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+    <p class="text-sm text-blue-800 dark:text-blue-300">
+      <strong>Nota:</strong> Aquí puedes editar todas las secciones de la landing page. Los cambios se guardan en tiempo real en el navegador.
+    </p>
+  </div>
+
+  <!-- Drag & Drop Instructions -->
+  <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+    <p class="text-sm text-blue-800 dark:text-blue-200">
+      <span class="font-semibold">💡 Tip:</span> Arrastra y suelta las secciones para reordenarlas. El símbolo <strong>⋮⋮</strong> indica que puedes moverla.
+    </p>
+  </div>
+
+  <!-- Sections Container -->
+  <div id="sections-container" class="space-y-6">
+    <!-- Se llena dinámicamente -->
+  </div>
+
+  <!-- Add New Section -->
+  <div class="mt-8 p-6 bg-white dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 text-center">
+    <button id="add-section-btn" class="flex items-center gap-2 mx-auto px-4 py-2 bg-accent text-white rounded-lg hover:bg-blue-600">
+      <span class="material-icons-round">add</span> Agregar Nueva Sección
+    </button>
+  </div>
+</main>
+
+<!-- Modal de Agregar Sección -->
+<div id="add-section-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full p-6 max-h-96 overflow-y-auto">
+    <h2 class="text-xl font-bold mb-4">Selecciona el tipo de sección</h2>
+    <div class="space-y-2">
+      <button onclick="createNewSection('hero')" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+        <span class="material-icons-round">image</span> Hero (Imagen + Texto)
+      </button>
+      <button onclick="createNewSection('text-image')" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+        <span class="material-icons-round">article</span> Texto + Imagen (Lado a Lado)
+      </button>
+      <button onclick="createNewSection('image-text')" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+        <span class="material-icons-round">image</span> Imagen + Texto (Lado a Lado)
+      </button>
+      <button onclick="createNewSection('banner')" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+        <span class="material-icons-round">format_color_fill</span> Banner (Imagen de Fondo)
+      </button>
+      <button onclick="createNewSection('gallery')" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+        <span class="material-icons-round">collections</span> Galería de Imágenes (Carrusel)
+      </button>
+      <button onclick="createNewSection('categories')" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+        <span class="material-icons-round">category</span> Categorías
+      </button>
+      <button onclick="createNewSection('featured-products')" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+        <span class="material-icons-round">shopping_bag</span> Productos Destacados
+      </button>
+      <button onclick="createNewSection('newsletter')" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
+        <span class="material-icons-round">mail</span> Newsletter
+      </button>
+      <button onclick="closeAddModal()" class="w-full p-3 text-left border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../scripts/landing-sections.js"></script>
+<script type="module">
+  import { saveLandingSections, getLandingSections } from '../scripts/firebase-landing.js';
+  
+  let sections = [];
+
+  // Cargar secciones al iniciar desde Firebase
+  async function loadSections() {
+    try {
+      const firebaseSections = await getLandingSections();
+      
+      if (firebaseSections && firebaseSections.length > 0) {
+        sections = firebaseSections;
+      } else {
+        // Si no hay en Firebase, intentar cargar del localStorage como fallback
+        sections = SectionsManager.getSections();
+      }
+      
+      // Asegurar que cada hero tiene al menos un slide con la información actual
+      sections.forEach(section => {
+        if (section.type === 'hero' && (!section.images || section.images.length === 0)) {
+          section.images = [
+            {
+              id: 1,
+              url: section.imageUrl || '',
+              badge: section.badge || '',
+              title: section.title || '',
+              description: section.subtitle || '',
+              buttonText: section.buttonText || '',
+              buttonLink: section.buttonLink || ''
+            }
+          ];
+        }
+      });
+      
+      renderSections();
+    } catch (error) {
+      console.error('Error cargando secciones:', error);
+      // Fallback a localStorage
+      sections = SectionsManager.getSections();
+      renderSections();
+    }
+  }
+
+  // Renderizar todas las secciones
+  function renderSections() {
+    const container = document.getElementById('sections-container');
+    container.innerHTML = '';
+
+    sections.forEach((section, index) => {
+      const sectionHTML = createSectionEditor(section, index);
+      container.appendChild(sectionHTML);
+    });
+  }
+
+  // Crear editor para una sección
+  function createSectionEditor(section, index) {
+    const div = document.createElement('div');
+    div.className = 'bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6 cursor-move hover:shadow-lg transition-shadow';
+    div.id = `section-${section.id}`;
+    div.draggable = true;
+    div.dataset.sectionIndex = index;
+    
+    // Event listeners para drag and drop
+    div.addEventListener('dragstart', (e) => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', div.innerHTML);
+      div.classList.add('opacity-50');
+      window.draggedSectionIndex = index;
+      console.log('🎯 Arrastrando sección:', index, section.type);
+    });
+    
+    div.addEventListener('dragend', () => {
+      div.classList.remove('opacity-50');
+      document.querySelectorAll('#sections-container > div').forEach(el => el.classList.remove('border-dashed', 'border-blue-500', 'bg-blue-50/50', 'dark:bg-blue-900/20'));
+    });
+    
+    div.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = div.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      const draggedEl = document.querySelector(`[data-section-index="${window.draggedSectionIndex}"]`);
+      
+      // Mostrar visual feedback
+      div.classList.add('border-dashed', 'border-blue-500', 'bg-blue-50/50', 'dark:bg-blue-900/20');
+    });
+    
+    div.addEventListener('dragleave', () => {
+      div.classList.remove('border-dashed', 'border-blue-500', 'bg-blue-50/50', 'dark:bg-blue-900/20');
+    });
+    
+    div.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const targetIndex = parseInt(div.dataset.sectionIndex);
+      const draggedIndex = window.draggedSectionIndex;
+      
+      if (draggedIndex !== targetIndex) {
+        // Intercambiar elementos
+        [sections[draggedIndex], sections[targetIndex]] = [sections[targetIndex], sections[draggedIndex]];
+        
+        // Recalcular órdenes
+        sections.forEach((section, idx) => {
+          section.order = idx + 1;
+        });
+        
+        console.log('✓ Secciones reordenadas:', sections.map(s => `${s.type}:${s.order}`));
+        renderSections();
+      }
+      
+      div.classList.remove('border-dashed', 'border-blue-500', 'bg-blue-50/50', 'dark:bg-blue-900/20');
+    });
+
+    let content = `
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-bold">⋮⋮ ${section.type.toUpperCase()}</h3>
+          <p class="text-sm text-slate-500">ID: ${section.id}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="addSectionAfter('${section.id}')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded" title="Agregar después">
+            <span class="material-icons-round">add_circle</span>
+          </button>
+          <button onclick="deleteSection('${section.id}')" class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 rounded" title="Eliminar">
+            <span class="material-icons-round">delete</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-4 border-t border-slate-200 dark:border-slate-700 pt-4">
+    `;
+
+    if (section.type === 'hero') {
+      content += `
+        <div class="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+          <label class="block text-sm font-medium mb-3">SETS DE IMÁGENES Y CONTENIDO</label>
+          
+          <div class="space-y-4 max-h-[800px] overflow-y-auto">
+            ${(section.images || []).map((img, idx) => `
+              <div class="border-2 border-slate-300 dark:border-slate-600 rounded-lg p-4 bg-slate-50 dark:bg-slate-700/50">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="font-semibold text-sm">Slide ${idx + 1}</h4>
+                  ${section.images && section.images.length > 1 ? `<button onclick="removeHeroImage('${section.id}', ${idx})" class="text-red-500 hover:text-red-700 p-1" title="Eliminar este slide">
+                    <span class="material-icons-round text-lg">delete</span>
+                  </button>` : ''}
+                </div>
+                
+                <!-- Imagen -->
+                <div class="mb-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <label class="block text-xs font-semibold mb-2 text-slate-600 dark:text-slate-400">IMAGEN</label>
+                  <div class="flex gap-3">
+                    <div class="flex-1 space-y-2">
+                      <input type="file" accept="image/*" onchange="uploadHeroImage('${section.id}', ${idx}, this)" class="w-full px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-xs dark:bg-slate-700">
+                      <input type="text" value="${img.url || ''}" oninput="updateHeroImage('${section.id}', ${idx}, 'url', this.value)" placeholder="URL de imagen" class="w-full px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-xs dark:bg-slate-700">
+                    </div>
+                    ${img.url ? `<img src="${img.url}" alt="Hero ${idx + 1}" class="w-20 h-20 object-cover rounded border border-slate-200">` : '<div class="w-20 h-20 bg-slate-200 dark:bg-slate-700 rounded flex items-center justify-center"><span class="material-icons-round text-slate-400">image</span></div>'}
+                  </div>
+                </div>
+                
+                <!-- Contenido de Texto -->
+                <div class="mb-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <label class="block text-xs font-semibold mb-2 text-slate-600 dark:text-slate-400">CONTENIDO DE TEXTO</label>
+                  <div class="space-y-2">
+                    <input type="text" value="${img.badge || ''}" oninput="updateHeroImage('${section.id}', ${idx}, 'badge', this.value)" placeholder="Badge (ej: New Arrival)" class="w-full px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-xs dark:bg-slate-700">
+                    <input type="text" value="${img.title || ''}" oninput="updateHeroImage('${section.id}', ${idx}, 'title', this.value)" placeholder="Título Principal" class="w-full px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-xs dark:bg-slate-700">
+                    <textarea oninput="updateHeroImage('${section.id}', ${idx}, 'description', this.value)" placeholder="Descripción/Subtítulo" class="w-full px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-xs dark:bg-slate-700 h-16">${img.description || ''}</textarea>
+                  </div>
+                </div>
+                
+                <!-- Botón -->
+                <div class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <label class="block text-xs font-semibold mb-2 text-slate-600 dark:text-slate-400">BOTÓN</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <input type="text" value="${img.buttonText || ''}" oninput="updateHeroImage('${section.id}', ${idx}, 'buttonText', this.value)" placeholder="Texto del botón" class="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-xs dark:bg-slate-700">
+                    <input type="text" value="${img.buttonLink || ''}" oninput="updateHeroImage('${section.id}', ${idx}, 'buttonLink', this.value)" placeholder="Link del botón" class="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-xs dark:bg-slate-700">
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          
+          <button onclick="addImageToHero('${section.id}')" class="w-full mt-4 py-3 text-sm bg-blue-500 text-white px-3 rounded hover:bg-blue-600 flex items-center justify-center gap-2 font-medium">
+            <span class="material-icons-round text-sm">add</span> Agregar Set Completo
+          </button>
+        </div>
+      `;
+    } else if (section.type === 'text-image') {
+      content += `
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Título</label>
+            <button onclick="clearField('${section.id}', 'title')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <input type="text" value="${section.title || ''}" oninput="updateSection('${section.id}', 'title', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Contenido</label>
+            <button onclick="clearField('${section.id}', 'content')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <textarea oninput="updateSection('${section.id}', 'content', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 h-24">${section.content || ''}</textarea>
+        </div>
+        <div class="border-t border-slate-200 dark:border-slate-700 pt-4">
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-medium">Imagen</label>
+            ${section.imageUrl ? `<button onclick="clearField('${section.id}', 'imageUrl')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Eliminar Imagen</button>` : ''}
+          </div>
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <input type="file" id="img-${section.id}" accept="image/*" onchange="uploadImage('${section.id}', this)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 text-sm">
+              <input type="text" value="${section.imageUrl || ''}" oninput="updateSection('${section.id}', 'imageUrl', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 text-xs mt-1" placeholder="https://...">
+            </div>
+            ${section.imageUrl ? `<img src="${section.imageUrl}" alt="Preview" class="w-24 h-24 object-cover rounded-lg border border-slate-200">` : '<div class="w-24 h-24 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center"><span class="material-icons-round text-slate-400">image</span></div>'}
+          </div>
+        </div>
+      `;
+    } else if (section.type === 'image-text') {
+      content += `
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Título</label>
+            <button onclick="clearField('${section.id}', 'title')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <input type="text" value="${section.title || ''}" oninput="updateSection('${section.id}', 'title', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Contenido</label>
+            <button onclick="clearField('${section.id}', 'content')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <textarea oninput="updateSection('${section.id}', 'content', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 h-24">${section.content || ''}</textarea>
+        </div>
+        <div class="border-t border-slate-200 dark:border-slate-700 pt-4">
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-medium">Imagen</label>
+            ${section.imageUrl ? `<button onclick="clearField('${section.id}', 'imageUrl')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Eliminar Imagen</button>` : ''}
+          </div>
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <input type="file" id="img-${section.id}" accept="image/*" onchange="uploadImage('${section.id}', this)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 text-sm">
+              <input type="text" value="${section.imageUrl || ''}" oninput="updateSection('${section.id}', 'imageUrl', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 text-xs mt-1" placeholder="https://...">
+            </div>
+            ${section.imageUrl ? `<img src="${section.imageUrl}" alt="Preview" class="w-24 h-24 object-cover rounded-lg border border-slate-200">` : '<div class="w-24 h-24 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center"><span class="material-icons-round text-slate-400">image</span></div>'}
+          </div>
+        </div>
+      `;
+    } else if (section.type === 'banner') {
+      content += `
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Título</label>
+            <button onclick="clearField('${section.id}', 'title')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <input type="text" value="${section.title || ''}" oninput="updateSection('${section.id}', 'title', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Subtítulo</label>
+            <button onclick="clearField('${section.id}', 'subtitle')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <textarea oninput="updateSection('${section.id}', 'subtitle', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 h-20">${section.subtitle || ''}</textarea>
+        </div>
+        <div class="border-t border-slate-200 dark:border-slate-700 pt-4">
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-medium">Imagen de Fondo</label>
+            ${section.backgroundImage ? `<button onclick="clearField('${section.id}', 'backgroundImage')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Eliminar Imagen</button>` : ''}
+          </div>
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <input type="file" id="img-${section.id}" accept="image/*" onchange="uploadImage('${section.id}', this)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 text-sm">
+              <input type="text" value="${section.backgroundImage || ''}" oninput="updateSection('${section.id}', 'backgroundImage', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 text-xs mt-1" placeholder="https://...">
+            </div>
+            ${section.backgroundImage ? `<img src="${section.backgroundImage}" alt="Preview" class="w-24 h-24 object-cover rounded-lg border border-slate-200">` : '<div class="w-24 h-24 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center"><span class="material-icons-round text-slate-400">image</span></div>'}
+          </div>
+        </div>
+      `;
+    } else if (section.type === 'gallery') {
+      content += `
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Título de la Galería</label>
+            <button onclick="clearField('${section.id}', 'title')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <input type="text" value="${section.title || ''}" oninput="updateSection('${section.id}', 'title', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+        </div>
+        <div class="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+          <div class="flex items-center justify-between mb-3">
+            <label class="block text-sm font-medium">Imágenes de la Galería</label>
+            <button onclick="addImageToGallery('${section.id}')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">+ Agregar Imagen</button>
+          </div>
+          
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            ${(section.images || []).map((img, idx) => `
+              <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50 dark:bg-slate-700/50">
+                <div class="flex gap-3 mb-2">
+                  <img src="${img.url}" alt="Galería ${idx + 1}" class="w-16 h-16 object-cover rounded border border-slate-200">
+                  <div class="flex-1">
+                    <input type="text" value="${img.caption || ''}" oninput="updateGalleryImage('${section.id}', ${idx}, 'caption', this.value)" placeholder="Texto/Título" class="w-full px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-sm dark:bg-slate-700 mb-2">
+                    <input type="file" accept="image/*" onchange="uploadGalleryImage('${section.id}', ${idx}, this)" class="w-full px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-xs dark:bg-slate-700">
+                  </div>
+                  <button onclick="removeGalleryImage('${section.id}', ${idx})" class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
+                    <span class="material-icons-round text-lg">delete</span>
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (section.type === 'categories') {
+      content += `
+        <div>
+          <label class="block text-sm font-medium mb-2">Título de la Sección</label>
+          <input type="text" value="${section.title}" oninput="updateSection('${section.id}', 'title', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 mb-4">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Categorías</label>
+          <div class="space-y-2 mb-3">
+            ${(section.categories || []).map((cat, idx) => `
+              <div class="flex gap-2 items-center p-3 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                <input type="text" value="${cat.name}" oninput="updateCategory('${section.id}', ${idx}, 'name', this.value)" placeholder="Nombre" class="flex-1 px-2 py-1 bg-transparent border-b border-slate-300 dark:border-slate-600 text-sm">
+                <input type="text" value="${cat.icon || ''}" oninput="updateCategory('${section.id}', ${idx}, 'icon', this.value)" placeholder="Icon" class="w-20 px-2 py-1 bg-transparent border-b border-slate-300 dark:border-slate-600 text-sm text-center">
+                <input type="text" value="${cat.link || ''}" oninput="updateCategory('${section.id}', ${idx}, 'link', this.value)" placeholder="Link" class="flex-1 px-2 py-1 bg-transparent border-b border-slate-300 dark:border-slate-600 text-sm">
+                <button onclick="removeCategory('${section.id}', ${idx})" class="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded">
+                  <span class="material-icons-round text-sm">delete</span>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+          <button onclick="addCategory('${section.id}')" class="w-full p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50">
+            + Agregar Categoría
+          </button>
+        </div>
+      `;
+    } else if (section.type === 'featured-products') {
+      content += `
+        <div>
+          <label class="block text-sm font-medium mb-2">Título de la Sección</label>
+          <input type="text" value="${section.title}" oninput="updateSection('${section.id}', 'title', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 mb-4">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Productos Destacados</label>
+          <div class="space-y-3 mb-3 max-h-96 overflow-y-auto">
+            ${(section.products || []).map((prod, idx) => `
+              <div class="p-3 bg-slate-100 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                <!-- Imagen y botones superiores -->
+                <div class="flex gap-2 items-start mb-3">
+                  <!-- Imagen con área clickeable -->
+                  <div class="w-16 h-16 rounded-lg bg-slate-300 dark:bg-slate-600 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors relative group" onclick="document.getElementById('product-image-input-${section.id}-${idx}').click()">
+                    ${prod.image ? `<img src="${prod.image}" alt="${prod.name}" class="w-full h-full object-cover rounded-lg">` : `<span class="material-icons-round text-white text-2xl">image</span>`}
+                    <input type="file" id="product-image-input-${section.id}-${idx}" accept="image/*" style="display: none;" onchange="uploadProductImage('${section.id}', ${idx}, this)">
+                    <div class="absolute inset-0 rounded-lg bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span class="material-icons-round text-white">edit</span>
+                    </div>
+                  </div>
+                  
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium">${prod.name}</p>
+                    <p class="text-xs text-slate-500 mb-2">ID: ${prod.id} • ${prod.price}</p>
+                    
+                    <!-- URL de imagen -->
+                    <div class="mb-2">
+                      <label class="text-xs text-slate-600 dark:text-slate-400">URL de imagen (o haz clic en la foto para subir)</label>
+                      <input type="text" value="${prod.image || ''}" oninput="updateProductField('${section.id}', ${idx}, 'image', this.value)" placeholder="https://..." class="w-full px-2 py-1 text-xs bg-white dark:bg-slate-600 border border-slate-200 dark:border-slate-500 rounded mt-1">
+                    </div>
+                  </div>
+                  
+                  <button onclick="removeProduct('${section.id}', ${idx})" class="p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded flex-shrink-0">
+                    <span class="material-icons-round text-sm">delete</span>
+                  </button>
+                </div>
+                
+                <!-- Link de detalle -->
+                <div>
+                  <label class="text-xs text-slate-600 dark:text-slate-400">Link de detalle del producto</label>
+                  <input type="text" value="${prod.detailLink || ''}" oninput="updateProductField('${section.id}', ${idx}, 'detailLink', this.value)" placeholder="ej: /product-detail.html?id=${prod.id}" class="w-full px-2 py-1 text-xs bg-white dark:bg-slate-600 border border-slate-200 dark:border-slate-500 rounded mt-1">
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <button onclick="openProductSelector('${section.id}')" class="w-full p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50">
+            + Agregar Producto
+          </button>
+        </div>
+      `;
+    } else if (section.type === 'newsletter') {
+      content += `
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Título</label>
+            <button onclick="clearField('${section.id}', 'title')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <input type="text" value="${section.title}" oninput="updateSection('${section.id}', 'title', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Subtítulo</label>
+            <button onclick="clearField('${section.id}', 'subtitle')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <textarea oninput="updateSection('${section.id}', 'subtitle', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 h-20">${section.subtitle}</textarea>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Placeholder del Email</label>
+            <button onclick="clearField('${section.id}', 'placeholderEmail')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <input type="text" value="${section.placeholderEmail}" oninput="updateSection('${section.id}', 'placeholderEmail', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium">Texto del Botón</label>
+            <button onclick="clearField('${section.id}', 'buttonText')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50">Limpiar</button>
+          </div>
+          <input type="text" value="${section.buttonText}" oninput="updateSection('${section.id}', 'buttonText', this.value)" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+        </div>
+      `;
+    }
+
+    content += `</div>`;
+
+    div.innerHTML = content;
+    return div;
+  }
+
+  // Actualizar una sección (SIN guardar automáticamente)
+  window.updateSection = (id, field, value) => {
+    const section = sections.find(s => s.id === id);
+    if (section) {
+      section[field] = value;
+      // NO guardar automáticamente - solo actualizar en memoria
+      console.log(`✏️ Cambio en memoria (no guardado): ${id}.${field}`);
+    }
+  };
+
+  // Limpiar/eliminar un campo específico (SIN guardar automáticamente)
+  window.clearField = (id, field) => {
+    const section = sections.find(s => s.id === id);
+    if (section) {
+      section[field] = '';
+      // NO guardar automáticamente
+      renderSections();
+      console.log(`✏️ Campo limpiado en memoria (no guardado): ${id}.${field}`);
+    }
+  };
+
+  // Mover sección arriba o abajo (SIN guardar automáticamente)
+  window.moveSection = (id, direction) => {
+    // Encontrar el índice de la sección a mover
+    const currentIndex = sections.findIndex(s => s.id === id);
+    if (currentIndex === -1) return;
+
+    // Calcular el nuevo índice
+    let newIndex = currentIndex + direction;
+    
+    // Validar que el nuevo índice esté dentro de rango
+    if (newIndex < 0 || newIndex >= sections.length) return;
+
+    // Intercambiar las posiciones en el array
+    [sections[currentIndex], sections[newIndex]] = [sections[newIndex], sections[currentIndex]];
+    
+    // Recalcular los valores de order para que sean consecutivos
+    sections.forEach((section, idx) => {
+      section.order = idx + 1;
+    });
+
+    console.log('✓ Sección movida:', sections.map(s => `${s.type}(order:${s.order})`));
+    // NO guardar automáticamente - solo renderizar
+    renderSections();
+  };
+
+  // Agregar sección después de otra
+  window.addSectionAfter = (id) => {
+    const index = sections.findIndex(s => s.id === id);
+    document.getElementById('current-index-for-add').value = index + 1;
+    document.getElementById('add-section-modal').classList.remove('hidden');
+  };
+
+  window.deleteSection = (id) => {
+    if (confirm('¿Estás seguro de que deseas eliminar esta sección?')) {
+      sections = sections.filter(s => s.id !== id);
+      // NO guardar automáticamente
+      renderSections();
+    }
+  };
+
+  window.addSectionAfter = (id) => {
+    const index = sections.findIndex(s => s.id === id);
+    window.currentIndexForAdd = index + 1;
+    document.getElementById('add-section-modal').classList.remove('hidden');
+  };
+
+  window.createNewSection = (type) => {
+    const newSection = {
+      id: `section-${Date.now()}`,
+      type: type,
+      order: sections.length + 1
+    };
+
+    if (type === 'hero') {
+      newSection.title = 'Nuevo Título';
+      newSection.subtitle = 'Nuevo subtítulo';
+      newSection.badge = 'Nuevo';
+      newSection.buttonText = 'Botón';
+      newSection.buttonLink = '#';
+      // Array de imágenes para hero (cada una es un set completo)
+      newSection.images = [
+        { 
+          id: 1, 
+          url: 'https://via.placeholder.com/1600x900?text=Slide+1', 
+          badge: 'Nuevo',
+          title: 'Primer Producto',
+          description: 'Descripción del primer producto',
+          buttonText: 'Comprar',
+          buttonLink: '#'
+        }
+      ];
+    } else if (type === 'text-image') {
+      newSection.title = 'Título';
+      newSection.content = 'Contenido del texto aquí';
+      newSection.imageUrl = 'https://via.placeholder.com/400x300';
+    } else if (type === 'image-text') {
+      newSection.title = 'Título';
+      newSection.content = 'Contenido del texto aquí';
+      newSection.imageUrl = 'https://via.placeholder.com/400x300';
+    } else if (type === 'banner') {
+      newSection.title = 'Título del Banner';
+      newSection.subtitle = 'Subtítulo sobre la imagen';
+      newSection.backgroundImage = 'https://via.placeholder.com/1600x600';
+    } else if (type === 'gallery') {
+      newSection.title = 'Mi Galería';
+      newSection.images = [
+        { id: 1, url: 'https://via.placeholder.com/300x200?text=Imagen+1', caption: 'Imagen 1' },
+        { id: 2, url: 'https://via.placeholder.com/300x200?text=Imagen+2', caption: 'Imagen 2' },
+        { id: 3, url: 'https://via.placeholder.com/300x200?text=Imagen+3', caption: 'Imagen 3' },
+        { id: 4, url: 'https://via.placeholder.com/300x200?text=Imagen+4', caption: 'Imagen 4' }
+      ];
+    } else if (type === 'categories') {
+      newSection.title = 'Categorías';
+      newSection.categories = [];
+    } else if (type === 'featured-products') {
+      newSection.title = 'Productos Destacados';
+      newSection.products = [];
+    } else if (type === 'newsletter') {
+      newSection.title = 'Newsletter';
+      newSection.subtitle = 'Suscríbete para recibir ofertas';
+      newSection.placeholderEmail = 'Tu email';
+      newSection.buttonText = 'Enviar';
+    }
+
+    sections.splice(window.currentIndexForAdd || sections.length, 0, newSection);
+    // NO guardar automáticamente
+    document.getElementById('add-section-modal').classList.add('hidden');
+    renderSections();
+  };
+
+  // Subir imagen y convertir a base64
+  window.uploadImage = (sectionId, fileInput) => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target.result; // Base64
+      const section = sections.find(s => s.id === sectionId);
+      
+      if (section) {
+        // Determinar qué campo de imagen usar según el tipo
+        if (section.type === 'banner') {
+          updateSection(sectionId, 'backgroundImage', imageData);
+        } else {
+          updateSection(sectionId, 'imageUrl', imageData);
+        }
+        
+        // Volver a renderizar para mostrar preview
+        renderSections();
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Agregar imagen a la galería (SIN guardar automáticamente)
+  window.addImageToGallery = (sectionId) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.type === 'gallery') {
+      if (!section.images) section.images = [];
+      
+      // Validar máximo de imágenes (10)
+      if (section.images.length >= 10) {
+        alert('⚠️ Límite máximo de 10 imágenes alcanzado');
+        return;
+      }
+      
+      const newImage = {
+        id: section.images.length + 1,
+        url: 'https://via.placeholder.com/300x200',
+        caption: `Imagen ${section.images.length + 1}`
+      };
+      section.images.push(newImage);
+      // NO guardar automáticamente
+      renderSections();
+    }
+  };
+
+  // Actualizar imagen en la galería (SIN guardar automáticamente)
+  window.updateGalleryImage = (sectionId, imageIndex, field, value) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.images && section.images[imageIndex]) {
+      section.images[imageIndex][field] = value;
+      // NO guardar automáticamente
+    }
+  };
+
+  // Subir imagen a la galería (SIN guardar automáticamente)
+  window.uploadGalleryImage = (sectionId, imageIndex, fileInput) => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target.result;
+      const section = sections.find(s => s.id === sectionId);
+      
+      if (section && section.images && section.images[imageIndex]) {
+        section.images[imageIndex].url = imageData;
+        // NO guardar automáticamente
+        renderSections();
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Eliminar imagen de la galería (SIN guardar automáticamente)
+  window.removeGalleryImage = (sectionId, imageIndex) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.images) {
+      section.images.splice(imageIndex, 1);
+      // NO guardar automáticamente
+      renderSections();
+    }
+  };
+
+  window.closeAddModal = () => {
+    document.getElementById('add-section-modal').classList.add('hidden');
+  };
+
+  // Funciones para manejar imágenes de Hero
+  window.addImageToHero = (sectionId) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.type === 'hero') {
+      if (!section.images) section.images = [];
+      
+      const newImage = {
+        id: section.images.length + 1,
+        url: '',
+        badge: '',
+        title: '',
+        description: '',
+        buttonText: '',
+        buttonLink: ''
+      };
+      section.images.push(newImage);
+      renderSections();
+    }
+  };
+
+  window.updateHeroImage = (sectionId, imageIndex, field, value) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.images && section.images[imageIndex]) {
+      section.images[imageIndex][field] = value;
+    }
+  };
+
+  window.uploadHeroImage = (sectionId, imageIndex, fileInput) => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target.result;
+      const section = sections.find(s => s.id === sectionId);
+      
+      if (section && section.images && section.images[imageIndex]) {
+        section.images[imageIndex].url = imageData;
+        renderSections();
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.removeHeroImage = (sectionId, imageIndex) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.images) {
+      section.images.splice(imageIndex, 1);
+      renderSections();
+    }
+  };
+
+  // Guardar cambios en Firebase
+  document.getElementById('save-btn').addEventListener('click', async () => {
+    try {
+      console.log('💾 Guardando secciones en Firebase:', sections.map(s => `${s.type}(${s.id}):order=${s.order}`));
+      
+      await saveLandingSections(sections);
+      
+      console.log('✓ Secciones guardadas en Firebase correctamente');
+      
+      // Disparar evento personalizado para que se actualice la landing page
+      if (window.opener) {
+        window.opener.dispatchEvent(new Event('localStorageChanged'));
+      }
+      
+      alert('✓ Secciones guardadas en Firebase. La landing page se actualizará automáticamente.');
+    } catch (error) {
+      console.error('Error guardando:', error);
+      alert('❌ Error al guardar: ' + error.message);
+    }
+  });
+
+  // Resetear a valores guardados en Firebase
+  document.getElementById('reset-btn').addEventListener('click', async () => {
+    if (confirm('¿Estás seguro? Esto descartará todos los cambios no guardados.')) {
+      try {
+        // Recargar las secciones guardadas de Firebase, descartando cambios en memoria
+        sections = await getLandingSections();
+        renderSections();
+        alert('✓ Cambios descartados. Volviendo a la última versión guardada en Firebase.');
+      } catch (error) {
+        console.error('Error descartando cambios:', error);
+        alert('❌ Error: ' + error.message);
+      }
+    }
+  });
+
+  // Funciones para categorías
+  window.addCategory = (sectionId) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section) {
+      if (!section.categories) section.categories = [];
+      section.categories.push({
+        id: Date.now(),
+        name: 'Nueva Categoría',
+        icon: 'category',
+        link: '#'
+      });
+      renderSections();
+    }
+  };
+
+  window.updateCategory = (sectionId, idx, field, value) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.categories && section.categories[idx]) {
+      section.categories[idx][field] = value;
+      // NO guardar automáticamente
+    }
+  };
+
+  window.removeCategory = (sectionId, idx) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.categories) {
+      section.categories.splice(idx, 1);
+      renderSections();
+    }
+  };
+
+  // Funciones para productos destacados
+  window.addProduct = (sectionId, product) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section) {
+      if (!section.products) section.products = [];
+      section.products.push(product);
+      renderSections();
+    }
+  };
+
+  window.removeProduct = (sectionId, idx) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.products) {
+      section.products.splice(idx, 1);
+      renderSections();
+    }
+  };
+
+  window.updateProductField = (sectionId, idx, field, value) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && section.products && section.products[idx]) {
+      section.products[idx][field] = value;
+      // NO guardar automáticamente
+    }
+  };
+
+  window.uploadProductImage = (sectionId, productIdx, fileInput) => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target.result; // Base64
+      const section = sections.find(s => s.id === sectionId);
+      
+      if (section && section.products && section.products[productIdx]) {
+        section.products[productIdx].image = imageData;
+        renderSections();
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.openProductSelector = (sectionId) => {
+    // Array de productos de ejemplo (puedes conectar con un inventario real)
+    const allProducts = [
+      { id: 1, name: 'MacBook Pro M2', price: '$1,299.00', category: 'Tecnología', image: 'https://via.placeholder.com/400x300?text=MacBook+Pro+M2', detailLink: '/product-detail.html?id=1' },
+      { id: 2, name: 'Smartphone Ultra', price: '$899.00', category: 'Móviles', image: 'https://via.placeholder.com/400x300?text=Smartphone+Ultra', detailLink: '/product-detail.html?id=2' },
+      { id: 3, name: 'Studio Headphones', price: '$249.00', category: 'Audio', image: 'https://via.placeholder.com/400x300?text=Studio+Headphones', detailLink: '/product-detail.html?id=3' },
+      { id: 4, name: 'Smartwatch Pro', price: '$399.00', category: 'Wearables', image: 'https://via.placeholder.com/400x300?text=Smartwatch+Pro', detailLink: '/product-detail.html?id=4' },
+      { id: 5, name: 'Laptop Gaming', price: '$1,599.00', category: 'Computadoras', image: 'https://via.placeholder.com/400x300?text=Laptop+Gaming', detailLink: '/product-detail.html?id=5' }
+    ];
+
+    const section = sections.find(s => s.id === sectionId);
+    const selectedIds = (section.products || []).map(p => p.id);
+
+    const html = `
+      <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-lg max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold">Selecciona Productos</h2>
+            <button onclick="openProductCreator('${sectionId}')" class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg text-xs font-medium hover:bg-green-200 dark:hover:bg-green-900/50">
+              + Crear Nuevo
+            </button>
+          </div>
+          
+          <div class="space-y-3 mb-4">
+            ${allProducts.map((prod, idx) => `
+              <label class="flex items-center p-3 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer">
+                <input type="checkbox" ${selectedIds.includes(prod.id) ? 'checked' : ''} onchange="if(this.checked) { addProduct('${sectionId}', {id: ${prod.id}, name: '${prod.name.replace(/'/g, "\\'")}', price: '${prod.price}', category: '${prod.category.replace(/'/g, "\\''")}', image: '${prod.image}', detailLink: '${prod.detailLink}'}) } else { const idx = (sections.find(s => s.id === '${sectionId}').products || []).findIndex(p => p.id === ${prod.id}); if(idx >= 0) removeProduct('${sectionId}', idx); }" class="mr-3 w-4 h-4">
+                <div class="flex-1 flex items-center gap-3">
+                  <img src="${prod.image}" alt="${prod.name}" class="w-12 h-12 rounded object-cover">
+                  <div>
+                    <p class="font-medium text-sm">${prod.name}</p>
+                    <p class="text-xs text-slate-500">${prod.category} • ${prod.price}</p>
+                  </div>
+                </div>
+              </label>
+            `).join('')}
+          </div>
+          <button onclick="this.closest('.fixed').remove()" class="w-full p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600">
+            Listo
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+
+  window.openProductCreator = (sectionId) => {
+    // Cerrar el modal anterior
+    document.querySelector('.fixed')?.remove();
+    
+    const html = `
+      <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+          <h2 class="text-xl font-bold mb-4">Crear Nuevo Producto</h2>
+          
+          <div class="space-y-4 mb-4">
+            <!-- Nombre -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Nombre del Producto *</label>
+              <input type="text" id="new-prod-name" placeholder="Ej: Mi Producto" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+            </div>
+            
+            <!-- Categoría -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Categoría</label>
+              <input type="text" id="new-prod-category" placeholder="Ej: Tecnología" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+            </div>
+            
+            <!-- Precio -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Precio</label>
+              <input type="text" id="new-prod-price" placeholder="Ej: $599.00" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+            </div>
+            
+            <!-- Imagen -->
+            <div>
+              <label class="block text-sm font-medium mb-1">URL de Imagen</label>
+              <input type="text" id="new-prod-image" placeholder="https://..." class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 mb-2">
+              <button onclick="document.getElementById('new-prod-image-file').click()" class="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600">
+                O subir imagen desde dispositivo
+              </button>
+              <input type="file" id="new-prod-image-file" accept="image/*" style="display: none;" onchange="uploadNewProductImage(this)">
+              <div id="new-prod-image-preview" class="mt-2"></div>
+            </div>
+            
+            <!-- Link de detalle -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Link de Detalle</label>
+              <input type="text" id="new-prod-link" placeholder="Ej: /product-detail.html?id=1" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+            </div>
+          </div>
+          
+          <div class="flex gap-2">
+            <button onclick="createAndAddProduct('${sectionId}')" class="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-800">
+              Crear y Agregar
+            </button>
+            <button onclick="openProductSelector('${sectionId}')" class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600">
+              Volver
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+
+  window.uploadNewProductImage = (fileInput) => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target.result;
+      document.getElementById('new-prod-image').value = imageData;
+      
+      // Mostrar preview
+      const preview = document.getElementById('new-prod-image-preview');
+      preview.innerHTML = `<img src="${imageData}" alt="Preview" class="w-full h-32 rounded-lg object-cover">`;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.createAndAddProduct = (sectionId) => {
+    const name = document.getElementById('new-prod-name').value.trim();
+    const category = document.getElementById('new-prod-category').value.trim();
+    const price = document.getElementById('new-prod-price').value.trim();
+    const image = document.getElementById('new-prod-image').value.trim();
+    const detailLink = document.getElementById('new-prod-link').value.trim();
+    
+    if (!name) {
+      alert('Por favor ingresa el nombre del producto');
+      return;
+    }
+    
+    const newProduct = {
+      id: Math.max(0, ...sections.flatMap(s => (s.products || []).map(p => p.id))) + 1,
+      name: name,
+      category: category || 'Producto',
+      price: price || '$0.00',
+      image: image || '',
+      detailLink: detailLink || `/product-detail.html?id=${Math.max(0, ...sections.flatMap(s => (s.products || []).map(p => p.id))) + 1}`
+    };
+    
+    addProduct(sectionId, newProduct);
+    
+    // Cerrar modal y volver a abrir el selector
+    document.querySelector('.fixed')?.remove();
+    setTimeout(() => openProductSelector(sectionId), 100);
+  };
+
+  // Cargar al iniciar
+  loadSections();
+</script>
+
+</body>
+</html>

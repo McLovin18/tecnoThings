@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Detalle del Producto | Tecno Things</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            accent: "#3b82f6"
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen">
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-30 w-full px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <button id="menu-toggle" onclick="window.toggleMobileMenu ? window.toggleMobileMenu() : document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10" type="button">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <a href="./index.html" class="flex flex-col cursor-pointer hover:opacity-80">
+        <span class="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Tienda Autorizada</span>
+        <h1 class="text-xl font-extrabold leading-none dark:text-white">TECNO THINGS</h1>
+      </a>
+      <button id="search-button" class="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 ml-2">
+        <span class="material-icons-round text-lg">search</span>
+      </button>
+    </div>
+    <div class="hidden lg:flex items-center gap-6">
+      <a href="./index.html" class="text-sm font-medium hover:text-accent">Inicio</a>
+      <a href="./blogs.html" class="text-sm font-medium hover:text-accent">Blogs</a>
+    </div>
+    <div class="hidden lg:flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <a href="./cart.html" class="relative p-2">
+        <span class="material-icons-round text-2xl">shopping_bag</span>
+        <span id="cart-badge" class="absolute top-0 right-0 w-4 h-4 bg-accent text-white text-[10px] font-bold flex items-center justify-center rounded-full hidden">0</span>
+      </a>
+      <div id="auth-container"></div>
+    </div>
+    <div class="lg:hidden flex items-center gap-2">
+      <button id="theme-toggle-mobile" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <a href="./cart.html" class="relative p-2">
+        <span class="material-icons-round text-2xl">shopping_bag</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="hidden lg:hidden fixed top-16 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 z-40 max-h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+  <div class="px-4 py-2 space-y-1 flex-shrink-0">
+    <a href="./index.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Inicio</a>
+    <a href="./blogs.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Blogs</a>
+    <a href="./cart.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Carrito</a>
+  </div>
+  <!-- Categorías en móvil - se llenan dinámicamente -->
+  <div class="flex-1 min-h-0 overflow-y-auto">
+    <div class="px-4 py-3 space-y-1" id="mobile-categories-container">
+      <hr class="my-2 dark:border-white/10">
+      <div class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 px-2 py-2">Categorías</div>
+      <!-- Categorías dinámicas -->
+    </div>
+  </div>
+  <div class="px-4 py-3 space-y-2 border-t border-slate-200 dark:border-white/10 flex-shrink-0">
+    <a href="../login_and_registration/login.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium flex items-center gap-2">
+      <span class="material-icons-round text-xl text-accent">person_outline</span>
+      Iniciar Sesión
+    </a>
+  </div>
+</div>
+
+<!-- CATEGORIES BAR (desktop) -->
+<div id="categories-bar" class="hidden lg:block sticky top-16 z-30 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-3">
+  <div class="flex items-center justify-center gap-6 max-w-full overflow-visible no-scrollbar">
+    <!-- Se llena dinámicamente -->
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="max-w-6xl mx-auto px-4 py-8 lg:px-6 pb-24 lg:pb-8">
+  <div id="loading" class="text-center py-12">
+    <span class="material-icons-round animate-spin text-4xl">sync</span>
+    <p class="mt-4 text-slate-500">Cargando producto...</p>
+  </div>
+
+  <div id="product" class="hidden">
+    <div class="flex items-center gap-2 mb-6 text-sm">
+      <a href="./index.html" class="text-accent hover:underline">Inicio</a>
+      <span>/</span>
+      <a href="#" id="category-link" class="text-accent hover:underline">Categoría</a>
+      <span>/</span>
+      <span id="breadcrumb-name">Producto</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="bg-slate-200 dark:bg-slate-800 rounded-lg aspect-square flex items-center justify-center overflow-hidden">
+        <img id="product-image" src="" alt="producto" class="w-full h-full object-cover">
+      </div>
+      <div id="image-thumbs" class="mt-3 flex flex-wrap gap-2"></div>
+
+      <div>
+        <span id="category-badge" class="inline-block px-3 py-1 text-xs bg-accent/10 text-accent rounded-full mb-4">Categoría</span>
+        <h1 id="product-name" class="text-4xl font-bold mb-4">Nombre</h1>
+        <p id="product-desc" class="text-slate-600 dark:text-slate-400 mb-6">Descripción</p>
+
+        <div class="mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+          <div class="flex items-baseline gap-3">
+            <span id="price" class="text-3xl font-bold text-accent">$0.00</span>
+            <span id="stock" class="text-sm text-green-600"></span>
+          </div>
+        </div>
+
+        <div class="space-y-4 mb-6">
+          <div class="flex items-center gap-4">
+            <label class="text-sm font-medium">Cantidad:</label>
+            <div class="flex items-center gap-2 border border-slate-300 dark:border-slate-600 rounded-lg">
+              <button onclick="decreaseQty()" class="px-3 py-2">−</button>
+              <input id="quantity" type="number" value="1" min="1" class="w-12 text-center bg-transparent outline-none">
+              <button onclick="increaseQty()" class="px-3 py-2">+</button>
+            </div>
+          </div>
+
+          <button id="add-btn" onclick="addToCart()" class="w-full px-4 py-3 bg-accent text-white font-bold rounded-lg hover:bg-accent/90">
+            Agregar al Carrito
+          </button>
+        </div>
+
+        <div class="bg-slate-100 dark:bg-slate-800 p-6 rounded-lg space-y-3 text-sm">
+          <div class="flex justify-between">
+            <span class="font-medium">SKU:</span>
+            <span id="sku">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="font-medium">Marca:</span>
+            <span id="brand">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="font-medium">Disponibles:</span>
+            <span id="stock-number">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    <section class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-700">
+      <h2 class="text-2xl font-bold mb-6">Productos Relacionados</h2>
+      <div id="related-products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    </section>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-slate-900 dark:bg-black text-white mt-20 border-t border-slate-800">
+  <div class="px-4 py-16 lg:px-6 max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+      <div>
+        <h3 class="text-2xl font-bold mb-4">TECNO THINGS</h3>
+        <div class="space-y-4 mb-6">
+          <div class="flex items-start gap-3">
+            <span class="material-icons-round text-accent">location_on</span>
+            <span class="text-slate-400 text-sm">Centro comercial San Felipe, Guayaquil, Ecuador 090101</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Productos</h4>
+        <ul class="space-y-3">
+          <li><a href="./products-by-category.html?category=perifericos" class="text-slate-400 hover:text-white">Periféricos</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Información</h4>
+        <ul class="space-y-3">
+          <li><a href="#" class="text-slate-400 hover:text-white">Sobre nosotros</a></li>
+          <li><a href="./blogs.html" class="text-slate-400 hover:text-white">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-6">Ubicación</h4>
+        <div class="rounded-lg overflow-hidden border border-slate-700 h-40">
+          <iframe width="100%" height="100%" style="border:0;" loading="lazy" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.5779746282846!2d-79.9309434!3d-2.1294174!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902d733792952ed1:0x2fda88783fa806f2!2sTECNOTHINGS%20GYE!5e0!3m2!1ses!2sec!4v1707593400000" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+import { getProductById, getProductsByCategoryFlexible } from '../scripts/firebase-products.js';
+import { CartManager } from '../scripts/firebase-cart.js';
+import { getCurrentUser } from '../scripts/firebase-auth.js';
+
+const urlParams = new URLSearchParams(window.location.search);
+const productId = urlParams.get('id');
+
+async function loadProduct() {
+  try {
+    const product = await getProductById(productId);
+    if (!product) {
+      document.getElementById('loading').innerHTML = '<p class="text-red-500">Producto no encontrado</p>';
+      return;
+    }
+
+    const mainImage = (Array.isArray(product.images) && product.images.length ? product.images[0] : product.image) || '';
+    document.getElementById('product-image').src = mainImage;
+    document.getElementById('product-name').textContent = product.name;
+    document.getElementById('product-desc').textContent = product.description;
+    document.getElementById('price').textContent = '$' + product.price.toFixed(2);
+    document.getElementById('category-badge').textContent = product.category;
+    document.getElementById('category-link').href = './products-by-category.html?category=' + product.category;
+    document.getElementById('breadcrumb-name').textContent = product.name;
+    document.getElementById('stock').textContent = product.stock > 0 ? 'En stock' : 'Agotado';
+    document.getElementById('stock-number').textContent = product.stock;
+    document.getElementById('sku').textContent = product.sku || '-';
+    document.getElementById('brand').textContent = product.brand || '-';
+
+    const gallery = Array.isArray(product.images) ? product.images : [];
+    const thumbsHtml = gallery.slice(0, 6).map((url, idx) => `
+      <button type="button" onclick="window.setMainImage('${url}')" class="w-16 h-16 rounded border border-slate-200 dark:border-slate-700 overflow-hidden ${idx===0?'ring-2 ring-accent':''}">
+        <img src="${url}" alt="thumb" class="w-full h-full object-cover">
+      </button>
+    `).join('');
+    const thumbsContainer = document.getElementById('image-thumbs');
+    thumbsContainer.innerHTML = thumbsHtml;
+    
+    window.setMainImage = (url) => {
+      document.getElementById('product-image').src = url;
+    };
+
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('product').classList.remove('hidden');
+
+    // Cargar productos relacionados
+    const relatedBase = product.categoryRoot || product.category;
+    const related = await getProductsByCategoryFlexible(relatedBase);
+    const filtered = related.filter(p => p.id !== productId).slice(0, 4);
+    
+    const relatedHtml = filtered.map(p => `
+      <a href="./product-detail.html?id=${p.id}" class="bg-white dark:bg-slate-800 rounded-lg overflow-hidden shadow hover:shadow-lg">
+        <img src="${(Array.isArray(p.images) && p.images.length ? p.images[0] : p.image) || ''}" alt="${p.name}" class="w-full h-40 object-cover">
+        <div class="p-4">
+          <h3 class="font-bold text-sm line-clamp-2">${p.name}</h3>
+          <p class="text-accent font-bold mt-2">$${p.price.toFixed(2)}</p>
+        </div>
+      </a>
+    `).join('');
+    
+    document.getElementById('related-products').innerHTML = relatedHtml;
+
+    const specs = product.details && typeof product.details === 'object' ? product.details : {};
+    const specsContainer = document.createElement('div');
+    specsContainer.className = 'mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm';
+    specsContainer.innerHTML = Object.entries(specs).map(([k,v]) => `
+      <div class="flex justify-between">
+        <span class="font-medium">${k}:</span>
+        <span>${v}</span>
+      </div>
+    `).join('');
+    document.getElementById('product').appendChild(specsContainer);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+window.increaseQty = () => {
+  const qty = document.getElementById('quantity');
+  qty.value = parseInt(qty.value) + 1;
+};
+
+window.decreaseQty = () => {
+  const qty = document.getElementById('quantity');
+  if (parseInt(qty.value) > 1) qty.value = parseInt(qty.value) - 1;
+};
+
+window.addToCart = async () => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      window.location.href = '../login_and_registration/login.html';
+      return;
+    }
+
+    const product = await getProductById(productId);
+    const quantity = parseInt(document.getElementById('quantity').value);
+    
+    await CartManager.addItem(productId, product, quantity);
+    
+    const btn = document.getElementById('add-btn');
+    btn.textContent = '✓ Agregado al carrito';
+    btn.classList.add('bg-green-600');
+    
+    setTimeout(() => {
+      btn.textContent = 'Agregar al Carrito';
+      btn.classList.remove('bg-green-600');
+    }, 2000);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+// Tema
+document.documentElement.classList.toggle('dark', localStorage.getItem('tecno-theme') === 'dark');
+document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('tecno-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+});
+
+loadProduct();
+</script>
+
+<!-- Navbar categorías 3 niveles (desktop) -->
+<script type="module">
+  import { CATEGORIES_STRUCTURE } from "../scripts/categories.js";
+  const bar = document.querySelector('#categories-bar > div');
+
+  function createCategoryLink(label, href) {
+    const a = document.createElement('a');
+    a.href = href;
+    a.className = 'px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-100 dark:hover:bg-white/10 transition-colors';
+    a.textContent = label;
+    return a;
+  }
+
+  CATEGORIES_STRUCTURE.forEach(cat1 => {
+    const group = document.createElement('div');
+    group.className = 'relative group';
+    const topLink = createCategoryLink(cat1.label, `./products-by-category.html?category=${encodeURIComponent(cat1.slug)}`);
+
+    if (cat1.children && cat1.children.length) {
+      const submenu = document.createElement('div');
+      submenu.className = 'absolute left-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-lg shadow-xl p-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all';
+
+      cat1.children.forEach(cat2 => {
+        const item2 = document.createElement('div');
+        item2.className = 'relative';
+        const link2 = createCategoryLink(cat2.label, `./products-by-category.html?category=${encodeURIComponent(cat2.slug)}`);
+        item2.appendChild(link2);
+
+        if (cat2.children && cat2.children.length) {
+          const submenu3 = document.createElement('div');
+          submenu3.className = 'absolute top-0 left-full ml-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-lg shadow-xl p-2 hidden group-hover:block';
+
+          cat2.children.forEach(cat3 => {
+            const link3 = createCategoryLink(cat3.label, `./products-by-category.html?category=${encodeURIComponent(cat3.slug)}`);
+            submenu3.appendChild(link3);
+          });
+
+          item2.classList.add('group');
+          item2.appendChild(submenu3);
+        }
+
+        submenu.appendChild(item2);
+      });
+
+      group.appendChild(submenu);
+    }
+
+    group.appendChild(topLink);
+    bar && bar.appendChild(group);
+  });
+</script>
+
+<!-- Categorías menú móvil -->
+<script type="module">
+  import { CATEGORIES_STRUCTURE } from "../scripts/categories.js";
+  const container = document.getElementById('mobile-categories-container');
+
+  function toggleMobileCategory(el) {
+    const panel = el.nextElementSibling;
+    const isOpen = panel.classList.contains('block');
+    document.querySelectorAll('#mobile-categories-container .subcategory-panel').forEach(p => p.classList.remove('block'));
+    if (!isOpen) panel.classList.add('block');
+  }
+
+  function createMobileItem(label, slug) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'rounded-lg';
+
+    const header = document.createElement('button');
+    header.type = 'button';
+    header.className = 'w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors';
+    header.innerHTML = `<span class="text-sm font-medium">${label}</span><span class="material-icons-round text-xl">expand_more</span>`;
+    header.addEventListener('click', () => toggleMobileCategory(header));
+
+    const panel = document.createElement('div');
+    panel.className = 'subcategory-panel hidden px-2';
+
+    const allLink = document.createElement('a');
+    allLink.href = `./products-by-category.html?category=${encodeURIComponent(slug)}`;
+    allLink.className = 'block px-4 py-2 rounded-md text-sm hover:bg-slate-100 dark:hover:bg-white/10';
+    allLink.textContent = 'Ver todo';
+    panel.appendChild(allLink);
+
+    wrapper.appendChild(header);
+    wrapper.appendChild(panel);
+    return { wrapper, panel };
+  }
+
+  CATEGORIES_STRUCTURE.forEach(cat1 => {
+    const { wrapper, panel } = createMobileItem(cat1.label, cat1.slug);
+
+    if (cat1.children && cat1.children.length) {
+      cat1.children.forEach(cat2 => {
+        const link2 = document.createElement('a');
+        link2.href = `./products-by-category.html?category=${encodeURIComponent(cat2.slug)}`;
+        link2.className = 'block px-4 py-2 rounded-md text-sm hover:bg-slate-100 dark:hover:bg-white/10';
+        link2.textContent = cat2.label;
+        panel.appendChild(link2);
+
+        if (cat2.children && cat2.children.length) {
+          cat2.children.forEach(cat3 => {
+            const link3 = document.createElement('a');
+            link3.href = `./products-by-category.html?category=${encodeURIComponent(cat3.slug)}`;
+            link3.className = 'block ml-4 px-4 py-2 rounded-md text-sm hover:bg-slate-100 dark:hover:bg-white/10';
+            link3.textContent = `• ${cat3.label}`;
+            panel.appendChild(link3);
+          });
+        }
+      });
+    }
+
+    container && container.appendChild(wrapper);
+  });
+</script>
+</body>
+</html>

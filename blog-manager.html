@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Gestor de Blogs - Tecno Things</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#ffffff",
+            "background-light": "#f8fafc",
+            "background-dark": "#000000",
+            accent: "#3b82f6"
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "12px",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-24">
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-40 px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <a href="./admin_dashboard/dashboard.html" class="flex flex-col cursor-pointer hover:opacity-80 transition-opacity">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Admin</span>
+        <h1 class="text-xl font-extrabold tracking-tighter leading-none">Panel Admin</h1>
+      </a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <a href="./admin_dashboard/dashboard.html" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+        Volver
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="flex-grow px-4 py-12 lg:px-6 max-w-6xl mx-auto w-full">
+  <div class="flex items-center justify-between mb-10">
+    <div>
+      <h1 class="text-4xl lg:text-5xl font-bold tracking-tight mb-2">Gestor de Blogs</h1>
+      <p class="text-lg text-slate-600 dark:text-slate-300">Crea, edita y elimina artículos de blog</p>
+    </div>
+    <button onclick="openBlogForm()" class="px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors flex items-center gap-2">
+      <span class="material-icons-round">add</span>
+      Nuevo Blog
+    </button>
+  </div>
+
+  <!-- BLOGS LIST -->
+  <div id="blogs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Los blogs se cargarán aquí -->
+  </div>
+</main>
+
+<!-- BLOG FORM MODAL -->
+<div id="blog-form-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white dark:bg-slate-800 rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold">Crear/Editar Blog</h2>
+      <button onclick="closeBlogForm()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+        <span class="material-icons-round">close</span>
+      </button>
+    </div>
+
+    <form id="blog-form" class="space-y-4">
+      <input type="hidden" id="blog-id">
+      
+      <!-- Título -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Título del Blog *</label>
+        <input type="text" id="blog-title" required placeholder="Ej: Las Mejores GPUs de 2026" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+      </div>
+
+      <!-- Descripción corta -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Descripción (resumen) *</label>
+        <textarea id="blog-description" required placeholder="Breve descripción que aparece en el listado" rows="3" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700"></textarea>
+      </div>
+
+      <!-- Contenido completo -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Contenido Completo *</label>
+        <textarea id="blog-content" required placeholder="Contenido del artículo..." rows="6" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700 font-mono text-sm"></textarea>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Puedes usar HTML básico. Ejemplo: &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;h2&gt;, etc.</p>
+      </div>
+
+      <!-- Categoría -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Categoría *</label>
+        <select id="blog-category" required class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+          <option value="">-- Selecciona una categoría --</option>
+          <option value="TECNOLOGÍA">TECNOLOGÍA</option>
+          <option value="LAPTOPS">LAPTOPS</option>
+          <option value="HARDWARE">HARDWARE</option>
+          <option value="ALMACENAMIENTO">ALMACENAMIENTO</option>
+          <option value="PERIFÉRICOS">PERIFÉRICOS</option>
+          <option value="MONITORES">MONITORES</option>
+          <option value="GAMING">GAMING</option>
+          <option value="SOFTWARE">SOFTWARE</option>
+        </select>
+      </div>
+
+      <!-- Color de fondo (gradient) -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Color Tema</label>
+        <select id="blog-color" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+          <option value="blue">Azul (Tecnología)</option>
+          <option value="purple">Púrpura (Laptops)</option>
+          <option value="green">Verde (Hardware)</option>
+          <option value="orange">Naranja (Almacenamiento)</option>
+          <option value="red">Rojo (Periféricos)</option>
+          <option value="cyan">Cyan (Monitores)</option>
+          <option value="pink">Rosa (Gaming)</option>
+          <option value="indigo">Índigo (Software)</option>
+        </select>
+      </div>
+
+      <!-- Icon -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Ícono Material</label>
+        <input type="text" id="blog-icon" placeholder="Ej: devices, laptop, memory, storage, speed, monitor, gamepad, code" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+      </div>
+
+      <!-- Autor -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Autor</label>
+        <input type="text" id="blog-author" placeholder="Tecno Things" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+      </div>
+
+      <!-- Fecha -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Fecha</label>
+        <input type="date" id="blog-date" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg dark:bg-slate-700">
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+        <button type="submit" class="flex-1 px-4 py-2 bg-accent text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+          Guardar Blog
+        </button>
+        <button type="button" onclick="closeBlogForm()" class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Gestor de blogs
+  class BlogManager {
+    constructor() {
+      this.storageKey = 'tecno_blogs';
+      this.initializeDefaultBlogs();
+      this.loadBlogs();
+      this.setupEventListeners();
+      this.setupTheme();
+    }
+
+    initializeDefaultBlogs() {
+      const existingBlogs = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+      if (existingBlogs.length === 0) {
+        const defaultBlogs = [
+          {
+            id: 1,
+            title: 'Las Mejores GPUs de 2026',
+            description: 'Descubre las tarjetas gráficas más potentes del mercado actual y cuáles son ideales para gaming y diseño profesional.',
+            content: '<h2>Introducción</h2><p>Las tarjetas gráficas han evolucionado significativamente en 2026...</p><h2>Top GPUs</h2><p><strong>NVIDIA RTX 5090:</strong> La tarjeta más potente del mercado...</p><p><strong>AMD Radeon RX 7900 XTX:</strong> Excelente alternativa con mejor precio...</p>',
+            category: 'TECNOLOGÍA',
+            color: 'blue',
+            icon: 'devices',
+            author: 'Tecno Things',
+            date: '2026-02-10'
+          },
+          {
+            id: 2,
+            title: 'MacBook vs Windows 2026',
+            description: 'Comparativa completa entre los mejores laptops de Apple y Windows para profesionales en 2026.',
+            content: '<h2>Comparación</h2><p>En 2026, ambas plataformas ofrecen excelentes opciones...</p><h2>MacBook Pro</h2><p>Ideal para diseño y edición de video...</p><h2>Windows Laptops</h2><p>Mejores opciones para gaming y productividad...</p>',
+            category: 'LAPTOPS',
+            color: 'purple',
+            icon: 'laptop',
+            author: 'Tecno Things',
+            date: '2026-02-08'
+          },
+          {
+            id: 3,
+            title: 'Guía de RAM DDR5',
+            description: 'Todo lo que necesitas saber sobre la memoria RAM DDR5: capacidad, velocidad y compatibilidad.',
+            content: '<h2>¿Qué es DDR5?</h2><p>DDR5 es la generación más reciente de memoria RAM...</p><h2>Velocidades</h2><p>Las velocidades varían desde 4800 MHz hasta 8000 MHz...</p>',
+            category: 'HARDWARE',
+            color: 'green',
+            icon: 'memory',
+            author: 'Tecno Things',
+            date: '2026-02-05'
+          },
+          {
+            id: 4,
+            title: 'SSD vs HDD: ¿Cuál elegir?',
+            description: 'Análisis detallado sobre las ventajas y desventajas de SSD y HDD para diferentes necesidades.',
+            content: '<h2>SSD (Solid State Drive)</h2><p>Velocidades extremadamente rápidas...</p><h2>HDD (Hard Disk Drive)</h2><p>Mayor capacidad a menor costo...</p><h2>Conclusión</h2><p>Para uso general, SSD es la mejor opción...</p>',
+            category: 'ALMACENAMIENTO',
+            color: 'orange',
+            icon: 'storage',
+            author: 'Tecno Things',
+            date: '2026-02-02'
+          },
+          {
+            id: 5,
+            title: 'Teclados Mecánicos: Guía Completa',
+            description: 'Descubre los tipos de switches mecánicos, marcas populares y cómo elegir el mejor para ti.',
+            content: '<h2>Tipos de Switches</h2><p><strong>Lineales:</strong> Sin resistencia...</p><p><strong>Táctiles:</strong> Con feedback de resistencia...</p><p><strong>Clicky:</strong> Con sonido característico...</p>',
+            category: 'PERIFÉRICOS',
+            color: 'red',
+            icon: 'speed',
+            author: 'Tecno Things',
+            date: '2026-02-01'
+          },
+          {
+            id: 6,
+            title: 'Monitores 4K para 2026',
+            description: 'Conoce los mejores monitores 4K con tecnología OLED y HDR para una experiencia visual inigualable.',
+            content: '<h2>Resolución 4K</h2><p>3840x2160 píxeles ofrecen una claridad excepcional...</p><h2>Tecnología OLED</h2><p>Negros perfectos y colores vibrantes...</p>',
+            category: 'MONITORES',
+            color: 'cyan',
+            icon: 'monitor',
+            author: 'Tecno Things',
+            date: '2026-01-31'
+          }
+        ];
+        localStorage.setItem(this.storageKey, JSON.stringify(defaultBlogs));
+      }
+    }
+
+    loadBlogs() {
+      const blogs = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+      const container = document.getElementById('blogs-container');
+      container.innerHTML = '';
+
+      blogs.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(blog => {
+        const card = document.createElement('div');
+        card.className = 'bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-lg transition-shadow';
+        card.innerHTML = `
+          <div class="h-32 bg-gradient-to-br from-${blog.color}-500 to-${blog.color}-600 flex items-center justify-center">
+            <span class="material-icons-round text-6xl text-white opacity-30">${blog.icon || 'article'}</span>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-700">${blog.category}</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">${blog.date}</span>
+            </div>
+            <h3 class="text-lg font-bold mb-2">${blog.title}</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-3 line-clamp-2">${blog.description}</p>
+            <div class="flex gap-2">
+              <button onclick="viewBlog(${blog.id})" class="flex-1 px-3 py-2 text-sm bg-accent text-white rounded-lg hover:bg-blue-600 transition-colors">
+                Ver
+              </button>
+              <button onclick="editBlog(${blog.id})" class="flex-1 px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                Editar
+              </button>
+              <button onclick="deleteBlog(${blog.id})" class="px-3 py-2 text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                <span class="material-icons-round text-base">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    setupEventListeners() {
+      document.getElementById('blog-form').addEventListener('submit', (e) => this.saveBlog(e));
+      document.getElementById('blog-date').valueAsDate = new Date();
+    }
+
+    setupTheme() {
+      const theme = localStorage.getItem('tecno-theme') || 'light';
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+      
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('tecno-theme', isDark ? 'dark' : 'light');
+      });
+    }
+
+    saveBlog(e) {
+      e.preventDefault();
+      const blogId = document.getElementById('blog-id').value;
+      const blogs = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+
+      const blogData = {
+        id: blogId ? parseInt(blogId) : Math.max(0, ...blogs.map(b => b.id)) + 1,
+        title: document.getElementById('blog-title').value,
+        description: document.getElementById('blog-description').value,
+        content: document.getElementById('blog-content').value,
+        category: document.getElementById('blog-category').value,
+        color: document.getElementById('blog-color').value,
+        icon: document.getElementById('blog-icon').value || 'article',
+        author: document.getElementById('blog-author').value || 'Tecno Things',
+        date: document.getElementById('blog-date').value
+      };
+
+      if (blogId) {
+        const index = blogs.findIndex(b => b.id === parseInt(blogId));
+        if (index !== -1) blogs[index] = blogData;
+      } else {
+        blogs.push(blogData);
+      }
+
+      localStorage.setItem(this.storageKey, JSON.stringify(blogs));
+      this.loadBlogs();
+      this.closeBlogForm();
+      alert('Blog guardado correctamente');
+    }
+
+    closeBlogForm() {
+      document.getElementById('blog-form-modal').classList.add('hidden');
+      document.getElementById('blog-form').reset();
+      document.getElementById('blog-id').value = '';
+      document.getElementById('blog-date').valueAsDate = new Date();
+    }
+  }
+
+  const blogManager = new BlogManager();
+
+  function openBlogForm() {
+    document.getElementById('blog-form-modal').classList.remove('hidden');
+    document.getElementById('blog-date').valueAsDate = new Date();
+  }
+
+  function closeBlogForm() {
+    blogManager.closeBlogForm();
+  }
+
+  function editBlog(id) {
+    const blogs = JSON.parse(localStorage.getItem('tecno_blogs') || '[]');
+    const blog = blogs.find(b => b.id === id);
+    if (!blog) return;
+
+    document.getElementById('blog-id').value = blog.id;
+    document.getElementById('blog-title').value = blog.title;
+    document.getElementById('blog-description').value = blog.description;
+    document.getElementById('blog-content').value = blog.content;
+    document.getElementById('blog-category').value = blog.category;
+    document.getElementById('blog-color').value = blog.color;
+    document.getElementById('blog-icon').value = blog.icon;
+    document.getElementById('blog-author').value = blog.author;
+    document.getElementById('blog-date').value = blog.date;
+
+    document.getElementById('blog-form-modal').classList.remove('hidden');
+  }
+
+  function deleteBlog(id) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este blog?')) return;
+
+    const blogs = JSON.parse(localStorage.getItem('tecno_blogs') || '[]');
+    const filtered = blogs.filter(b => b.id !== id);
+    localStorage.setItem('tecno_blogs', JSON.stringify(filtered));
+    blogManager.loadBlogs();
+  }
+
+  function viewBlog(id) {
+    window.location.href = `./blog-detail.html?id=${id}`;
+  }
+</script>
+
+</body>
+</html>

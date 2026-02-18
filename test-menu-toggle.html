@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Menu Toggle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="p-4">
+        <h1 class="text-2xl font-bold mb-4">Test de Menu Toggle</h1>
+        
+        <!-- Botón hamburguesa -->
+        <button id="menu-toggle" class="p-2 bg-blue-500 text-white rounded">
+            ☰ Abrir Menú
+        </button>
+        
+        <!-- Menú móvil -->
+        <div id="mobile-menu" class="hidden mt-4 p-4 bg-blue-100 border-2 border-blue-500">
+            <a href="#" class="block py-2 hover:bg-blue-200">Producto 1</a>
+            <a href="#" class="block py-2 hover:bg-blue-200">Producto 2</a>
+            <a href="#" class="block py-2 hover:bg-blue-200">Producto 3</a>
+        </div>
+    </div>
+
+    <script>
+        console.log('✓ Script iniciando...');
+        
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        console.log('menuToggle encontrado:', !!menuToggle);
+        console.log('mobileMenu encontrado:', !!mobileMenu);
+        
+        if (menuToggle && mobileMenu) {
+            menuToggle.addEventListener('click', function(e) {
+                console.log('✓✓✓ CLICK detectado en menu-toggle');
+                console.log('ANTES - Clases del menú:', mobileMenu.className);
+                e.stopPropagation();
+                mobileMenu.classList.toggle('hidden');
+                console.log('DESPUÉS - Clases del menú:', mobileMenu.className);
+                console.log('✓ Menu actualmente está:', mobileMenu.classList.contains('hidden') ? 'OCULTO' : 'VISIBLE');
+            });
+            console.log('✓ Event listener agregado exitosamente');
+        } else {
+            console.error('✗ No se encontré menu-toggle o mobile-menu');
+        }
+    </script>
+</body>
+</html>

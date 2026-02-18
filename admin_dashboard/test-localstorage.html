@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Test LocalStorage - Tecno Things</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .section {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      cursor: pointer;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .log {
+      background: #f0f0f0;
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 4px solid #3b82f6;
+      font-family: monospace;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test: LocalStorage para Landing Sections</h1>
+  
+  <div class="section">
+    <h2>1. Verificar localStorage</h2>
+    <button onclick="testLocalStorage()">Verificar LocalStorage</button>
+    <div id="storage-test"></div>
+  </div>
+
+  <div class="section">
+    <h2>2. Ver Secciones Actuales</h2>
+    <button onclick="showSections()">Mostrar Secciones</button>
+    <div id="sections-test"></div>
+  </div>
+
+  <div class="section">
+    <h2>3. Modificar Hero Section</h2>
+    <label>Nuevo Título:
+      <input type="text" id="hero-title-input" value="Potencia sin límites." style="width: 300px; padding: 8px;">
+    </label>
+    <button onclick="updateHero()">Actualizar Hero</button>
+    <div id="hero-test"></div>
+  </div>
+
+  <div class="section">
+    <h2>4. Links de Prueba</h2>
+    <a href="../tecno_things_landing_page/index.html" style="margin-right: 20px; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">
+      Ir a Landing Page →
+    </a>
+    <a href="./landing-editor.html" style="padding: 10px 20px; background: #10b981; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">
+      Ir a Editor →
+    </a>
+  </div>
+
+  <div id="log-output"></div>
+
+  <script type="module">
+    import { SectionsManager } from '../landing-sections.js';
+
+    window.log = (message, type = 'info') => {
+      const logDiv = document.getElementById('log-output');
+      const logEntry = document.createElement('div');
+      logEntry.className = `log ${type}`;
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(logEntry);
+      console.log(message);
+    };
+
+    window.testLocalStorage = () => {
+      const result = document.getElementById('storage-test');
+      const stored = localStorage.getItem('tecno_landing_sections');
+      
+      if (stored) {
+        result.innerHTML = `
+          <div class="log success">
+            <strong>✓ LocalStorage tiene datos</strong><br>
+            Clave: 'tecno_landing_sections'<br>
+            Tamaño: ${stored.length} caracteres<br>
+            <textarea style="width: 100%; height: 200px;">${stored}</textarea>
+          </div>
+        `;
+        window.log('LocalStorage verificado correctamente', 'success');
+      } else {
+        result.innerHTML = `
+          <div class="log error">
+            <strong>✗ No hay datos en localStorage</strong><br>
+            Se usarán valores por defecto
+          </div>
+        `;
+        window.log('Sin datos en localStorage - usando defaults', 'error');
+      }
+    };
+
+    window.showSections = () => {
+      const result = document.getElementById('sections-test');
+      try {
+        const sections = SectionsManager.getSections();
+        let html = '<div class="log success"><strong>Secciones Cargadas:</strong><pre>' + JSON.stringify(sections, null, 2) + '</pre></div>';
+        result.innerHTML = html;
+        window.log(`${sections.length} secciones cargadas`, 'success');
+      } catch (e) {
+        result.innerHTML = `<div class="log error">Error: ${e.message}</div>`;
+        window.log(`Error al cargar secciones: ${e.message}`, 'error');
+      }
+    };
+
+    window.updateHero = () => {
+      const result = document.getElementById('hero-test');
+      try {
+        const newTitle = document.getElementById('hero-title-input').value;
+        SectionsManager.updateSection('hero-section', { title: newTitle });
+        result.innerHTML = `<div class="log success">✓ Hero actualizado con título: "${newTitle}"</div>`;
+        window.log(`Hero actualizado: ${newTitle}`, 'success');
+        
+        // Verificar que se guardó
+        const hero = SectionsManager.getSection('hero-section');
+        console.log('Hero guardado:', hero);
+      } catch (e) {
+        result.innerHTML = `<div class="log error">Error: ${e.message}</div>`;
+        window.log(`Error al actualizar hero: ${e.message}`, 'error');
+      }
+    };
+
+    // Mostrar estado inicial
+    window.log('Página test cargada', 'success');
+  </script>
+</body>
+</html>

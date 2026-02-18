@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmación de Orden - TecnoThings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#ffffff',
+            'background-light': '#f8fafc',
+            'background-dark': '#000000',
+            accent: '#3b82f6'
+          }
+        }
+      }
+    };
+  </script>
+<script type="module">
+  import { CATEGORIES_STRUCTURE } from '../scripts/categories.js';
+
+  function initializeCategoriesNavbar() {
+    const categoriesContainer = document.querySelector('#categories-bar > div.flex');
+    if (!categoriesContainer) return;
+
+    Object.entries(CATEGORIES_STRUCTURE).forEach(([key, category]) => {
+      const categoryDiv = document.createElement('div');
+      categoryDiv.className = 'relative group';
+
+      const button = document.createElement('button');
+      button.className = 'flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 whitespace-nowrap transition-colors';
+      button.innerHTML = `
+        <span class="material-icons-round text-lg">${category.icon}</span>
+        <span class="text-sm font-medium">${category.name}</span>
+        <span class="material-icons-round text-sm">expand_more</span>
+      `;
+
+      const dropdown = document.createElement('div');
+      dropdown.className = 'absolute left-0 top-full mt-0 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl hidden group-hover:block z-50 overflow-visible';
+
+      Object.entries(category.subcategories).forEach(([subkey, subcat]) => {
+        const subItemDiv = document.createElement('div');
+        subItemDiv.className = 'relative group/submenu';
+
+        const subLink = document.createElement('a');
+        const hasSubsub = subcat.subsubcategories && Object.keys(subcat.subsubcategories).length > 0;
+        subLink.href = `./products-by-category.html?category=${category.id}&subcategory=${subcat.id}`;
+        subLink.className = 'flex items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 text-sm transition-colors';
+        subLink.innerHTML = `
+          <span class="flex items-center gap-3 flex-1">
+            <span class="material-icons-round text-base">${subcat.icon}</span>
+            <span>${subcat.name}</span>
+          </span>
+          ${hasSubsub ? '<span class="material-icons-round text-xs ml-auto">chevron_right</span>' : ''}
+        `;
+
+        if (hasSubsub) {
+          subLink.addEventListener('click', (e) => {
+            e.preventDefault();
+          });
+
+          const submenu = document.createElement('div');
+          submenu.className = 'absolute left-full top-0 mt-0 ml-1 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl hidden group-hover/submenu:block z-50 overflow-hidden';
+
+          Object.entries(subcat.subsubcategories).forEach(([subsubkey, subsubcat]) => {
+            const subsubLink = document.createElement('a');
+            subsubLink.href = `./products-by-category.html?category=${category.id}&subcategory=${subcat.id}&subsubcategory=${subsubcat.id}`;
+            subsubLink.className = 'flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 text-sm transition-colors';
+            subsubLink.innerHTML = `<span>${subsubcat.name}</span>`;
+            submenu.appendChild(subsubLink);
+          });
+
+          subItemDiv.appendChild(submenu);
+        }
+
+        subItemDiv.appendChild(subLink);
+        dropdown.appendChild(subItemDiv);
+      });
+
+      categoryDiv.appendChild(button);
+      categoryDiv.appendChild(dropdown);
+      categoriesContainer.appendChild(categoryDiv);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCategoriesNavbar);
+  } else {
+    initializeCategoriesNavbar();
+  }
+</script>
+
+<script type="module">
+  import { CATEGORIES_STRUCTURE } from '../scripts/categories.js';
+
+  window.toggleMobileCategory = (button) => {
+    const categoryDiv = button.parentElement;
+    const itemsDiv = categoryDiv.querySelector('div[class*="hidden"]');
+    if (itemsDiv) {
+      itemsDiv.classList.toggle('hidden');
+      const icon = button.querySelector('.material-icons-round:last-child');
+      if (icon) {
+        icon.textContent = itemsDiv.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+      }
+    }
+  };
+
+  function initializeMobileMenu() {
+    const container = document.getElementById('mobile-categories-container');
+    if (!container) return;
+
+    Object.entries(CATEGORIES_STRUCTURE).forEach(([key, category]) => {
+      const categoryDiv = document.createElement('div');
+
+      const button = document.createElement('button');
+      button.className = 'w-full flex items-center justify-between px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium';
+      button.type = 'button';
+      button.onclick = function() { window.toggleMobileCategory(this); };
+      button.innerHTML = `
+        <span class="flex items-center gap-2">
+          <span class="material-icons-round text-base">${category.icon}</span>
+          <span>${category.name}</span>
+        </span>
+        <span class="material-icons-round text-base">expand_more</span>
+      `;
+
+      categoryDiv.appendChild(button);
+
+      const subItemsDiv = document.createElement('div');
+      subItemsDiv.className = 'hidden ml-4 space-y-1 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2 my-1';
+
+      Object.entries(category.subcategories).forEach(([subkey, subcat]) => {
+        const subLink = document.createElement('a');
+        subLink.href = `./products-by-category.html?category=${category.id}&subcategory=${subcat.id}`;
+        subLink.className = 'block px-3 py-2 rounded text-xs hover:bg-slate-200 dark:hover:bg-slate-700';
+        subLink.textContent = subcat.name;
+        subItemsDiv.appendChild(subLink);
+      });
+
+      categoryDiv.appendChild(subItemsDiv);
+      container.appendChild(categoryDiv);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeMobileMenu);
+  } else {
+    initializeMobileMenu();
+  }
+</script>
+
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen">
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-30 w-full px-4 py-3 lg:px-6 lg:py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+  <div class="flex items-center justify-between max-w-full mx-auto">
+    <div class="flex items-center gap-4">
+      <button id="menu-toggle" onclick="window.toggleMobileMenu ? window.toggleMobileMenu() : document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10" type="button">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <a href="./index.html" class="flex flex-col cursor-pointer hover:opacity-80">
+        <span class="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Tienda Autorizada</span>
+        <h1 class="text-xl font-extrabold leading-none dark:text-white">TECNO THINGS</h1>
+      </a>
+      <button id="search-button" class="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 ml-2">
+        <span class="material-icons-round text-lg">search</span>
+      </button>
+    </div>
+    <div class="hidden lg:flex items-center gap-6">
+      <a href="./index.html" class="text-sm font-medium hover:text-accent">Inicio</a>
+      <a href="./blogs.html" class="text-sm font-medium hover:text-accent">Blogs</a>
+    </div>
+    <div class="hidden lg:flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10">
+        <span class="material-icons-round text-xl">light_mode</span>
+      </button>
+      <a href="./cart.html" class="relative p-2">
+        <span class="material-icons-round text-2xl">shopping_bag</span>
+        <span id="cart-badge" class="absolute top-0 right-0 w-4 h-4 bg-accent text-white text-[10px] font-bold flex items-center justify-center rounded-full hidden">0</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="hidden lg:hidden fixed top-16 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 z-40 max-h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
+  <div class="px-4 py-2 space-y-1 flex-shrink-0">
+    <a href="./index.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Inicio</a>
+    <a href="./blogs.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Blogs</a>
+    <a href="./cart.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium">Carrito</a>
+  </div>
+  <div class="flex-1 min-h-0 overflow-y-auto">
+    <div class="px-4 py-3 space-y-1" id="mobile-categories-container">
+      <hr class="my-2 dark:border-white/10">
+      <div class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 px-2 py-2">Categorías</div>
+      <!-- Categorías dinámicas -->
+    </div>
+  </div>
+  <div class="px-4 py-3 space-y-2 border-t border-slate-200 dark:border-white/10 flex-shrink-0">
+    <a href="../login_and_registration/login.html" class="block px-4 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-sm font-medium flex items-center gap-2">
+      <span class="material-icons-round text-xl text-accent">person_outline</span>
+      Iniciar Sesión
+    </a>
+  </div>
+</div>
+
+<!-- CATEGORIES BAR (desktop) -->
+<div id="categories-bar" class="hidden lg:block sticky top-16 z-30 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-3">
+  <div class="flex items-center justify-center gap-6 max-w-full overflow-visible no-scrollbar">
+    <!-- Se llena dinámicamente -->
+  </div>
+</div>
+
+<div class="max-w-2xl mx-auto px-4 py-12">
+  <!-- Contenedor de carga -->
+  <div id="loading" class="text-center py-12">
+    <div class="flex justify-center mb-4">
+      <div class="animate-spin">
+        <span class="material-icons text-blue-600">loading</span>
+      </div>
+    </div>
+    <p class="text-gray-600 dark:text-gray-400">Verificando pedido...</p>
+  </div>
+
+  <!-- Contenedor de confirmación -->
+  <div id="confirmation" class="hidden">
+    <!-- Éxito -->
+    <div class="bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-lg p-8 text-center mb-8">
+      <div class="text-5xl mb-4">✅</div>
+      <h1 class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">¡Pedido Confirmado!</h1>
+      <p class="text-gray-600 dark:text-gray-400 mb-6">Tu pedido ha sido enviado exitosamente</p>
+      
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 text-left">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">ID del Pedido</p>
+            <p id="order-id" class="font-mono text-lg font-bold dark:text-white">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Estado</p>
+            <p id="order-status" class="font-bold dark:text-white text-yellow-600">pendiente</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
+            <p id="order-total" class="text-lg font-bold dark:text-white">$0.00</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Fecha</p>
+            <p id="order-date" class="font-bold dark:text-white">-</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dirección de envío -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 text-left mb-6">
+        <h3 class="text-lg font-bold mb-4 dark:text-white">Dirección de Envío</h3>
+        <p id="shipping-address" class="text-gray-600 dark:text-gray-400"></p>
+      </div>
+
+      <!-- Productos -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 text-left mb-6">
+        <h3 class="text-lg font-bold mb-4 dark:text-white">Productos</h3>
+        <div id="products-list" class="space-y-3"></div>
+      </div>
+
+      <!-- Siguientes pasos -->
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-6">
+        <h3 class="font-bold mb-3 dark:text-white">Próximos Pasos:</h3>
+        <ol class="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <li><span class="font-bold">1.</span> Realiza la transferencia bancaria con el monto indicado</li>
+          <li><span class="font-bold">2.</span> Comprueba la transferencia con una captura de pantalla</li>
+          <li><span class="font-bold">3.</span> Sube el comprobante en tu página de órdenes</li>
+          <li><span class="font-bold">4.</span> Espera a que el administrador valide tu pago</li>
+        </ol>
+      </div>
+
+      <!-- Información de pago -->
+      <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-6 mb-6 text-left">
+        <h3 class="font-bold mb-3 dark:text-amber-300">Información Bancaria:</h3>
+        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <p><span class="font-bold">Banco:</span> Banco del Pichincha</p>
+          <p><span class="font-bold">Cuenta:</span> 0000123456789</p>
+          <p><span class="font-bold">RUC:</span> 1234567890001</p>
+          <p><span class="font-bold">Beneficiario:</span> TECNOTHINGS GYE</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="flex gap-4">
+      <a href="./index.html" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
+        Volver al inicio
+      </a>
+      <a href="./my-orders.html" class="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
+        Ver mis pedidos
+      </a>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div id="error" class="hidden bg-red-50 dark:bg-red-900/20 border-2 border-red-500 rounded-lg p-8 text-center">
+    <div class="text-5xl mb-4">❌</div>
+    <h1 class="text-3xl font-bold text-red-600 dark:text-red-400 mb-4">Error al cargar el pedido</h1>
+    <p id="error-message" class="text-gray-600 dark:text-gray-400 mb-6"></p>
+    <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg inline-block">
+      Volver al inicio
+    </a>
+  </div>
+</div>
+
+<script type="module">
+  // Tema: aplicar estado guardado y toggle
+  document.documentElement.classList.toggle('dark', localStorage.getItem('tecno-theme') === 'dark');
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('tecno-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      });
+    }
+  });
+</script>
+
+<script type="module">
+  import { getOrderById } from '../scripts/firebase-orders.js';
+  import { getCurrentUser } from '../scripts/firebase-auth.js';
+  import { protectRoute } from '../scripts/route-protection.js';
+
+  // Proteger ruta
+  await protectRoute('cliente');
+
+  async function loadOrder() {
+    try {
+      // Obtener ID del parámetro URL
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get('orderId');
+
+      if (!orderId) {
+        throw new Error('No se especificó ID de pedido');
+      }
+
+      const order = await getOrderById(orderId);
+
+      if (!order) {
+        throw new Error('Pedido no encontrado');
+      }
+
+      // Mostrar datos
+      document.getElementById('order-id').textContent = order.id;
+      document.getElementById('order-total').textContent = '$' + order.totalAmount.toFixed(2);
+      
+      const statusMap = {
+        'pendiente': '⏳ Pendiente',
+        'validando': '🔍 Validando',
+        'en_transito': '📦 En Tránsito',
+        'entregado': '✅ Entregado',
+        'cancelado': '❌ Cancelado'
+      };
+      
+      document.getElementById('order-status').textContent = statusMap[order.status] || order.status;
+
+      // Fecha
+      const date = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+      document.getElementById('order-date').textContent = new Intl.DateTimeFormat('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(date);
+
+      // Dirección
+      const addr = order.shippingAddress;
+      document.getElementById('shipping-address').innerHTML = `
+        ${addr.street}<br/>
+        ${addr.city}, ${addr.postalCode}<br/>
+        ${addr.country}
+      `;
+
+      // Productos
+      const productsList = document.getElementById('products-list');
+      productsList.innerHTML = order.products.map(product => `
+        <div class="flex justify-between items-start pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
+          <div>
+            <p class="font-medium dark:text-white">${product.name}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              $${product.price.toFixed(2)} x ${product.quantity}
+            </p>
+          </div>
+          <p class="font-medium dark:text-white">$${(product.price * product.quantity).toFixed(2)}</p>
+        </div>
+      `).join('');
+
+      // Ocultar carga y mostrar confirmación
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('confirmation').classList.remove('hidden');
+
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('error').classList.remove('hidden');
+      document.getElementById('error-message').textContent = error.message;
+    }
+  }
+
+  loadOrder();
+</script>
+
+<style>
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .animate-spin {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+  }
+</style>
+
+</body>
+</html>
